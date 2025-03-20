@@ -1,0 +1,45 @@
+{
+  "name": "tanstack-query-vue-helpers",
+  "version": "0.0.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/tanstack-query-vue-helpers.umd.cjs",
+  "module": "./dist/tanstack-query-vue-helpers.js",
+  "exports": {
+    ".": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/tanstack-query-vue-helpers.js",
+      "require": "./dist/tanstack-query-vue-helpers.umd.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "types": "./dist/main.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@inertiajs/vue3": "^2.0.5",
+    "@tanstack/vue-query": "^5.69.0",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "@vitest/coverage-istanbul": "^3.0.9",
+    "@vitest/coverage-v8": "^3.0.9",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.7.0",
+    "jsdom": "^26.0.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.9",
+    "vue-tsc": "^2.2.4"
+  }
+}

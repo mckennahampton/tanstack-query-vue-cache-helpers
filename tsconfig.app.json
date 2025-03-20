@@ -1,0 +1,17 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "composite": true,
+    "emitDeclarationOnly": true, // use this field instead of "noEmit"
+    "noEmit": false,
+  },
+  "include": ["lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.vue", "lib/composables/useTanstackQueryHelpers.test.ts_old"]
+}
