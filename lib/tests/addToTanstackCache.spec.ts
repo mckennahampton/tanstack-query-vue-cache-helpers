@@ -1,53 +1,46 @@
-import { mount } from '@vue/test-utils'
-import { nextTick, defineComponent, h } from 'vue'
-import { describe, it, expect, beforeEach } from 'vitest'
-import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
-import { useTanstackCacheHelpers } from '../composables/useTanstackQueryHelpers'
+import { mount } from '@vue/test-utils';
+import { describe, it, expect } from 'vitest';
+import { VueQueryPlugin } from '@tanstack/vue-query';
+import AddToEmpty from './components/addToTanstackCache/AddToEmpty.vue';
+import AddToFront from './components/addToTanstackCache/AddToFront.vue';
+import AddToBack from './components/addToTanstackCache/AddToBack.vue';
 
-const queryClient = new QueryClient();
+const pollArgs = {
+  interval: 250,
+  timeout: 10000,
+};
 
-const createTestComponent = (fn: () => any) => {
-    return defineComponent({
-        setup() {
-          return fn();
-        },
-        render() {
-          return h("div");
-        },
-    });
-}
+describe('addToTanstackCache tests', () => {
+  it('adds to an empty cache', async () => {
+    const wrapper = mount(AddToEmpty, { global: { plugins: [VueQueryPlugin] } });
 
-describe("Add Item", () => {
-    let wrapper: any;
 
-    beforeEach(() => {
-        queryClient.clear();
-        wrapper = mount(
-          createTestComponent(() => {
-            const helpers = useTanstackCacheHelpers("testCache");
-            return { helpers };
-          }),
-          {
-            global: {
-              plugins: [VueQueryPlugin],
-            },
-          }
-        );
-    })
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.addItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('First Item');
+  });
 
-    it("should add an item to the cache", async () => {
-        const item = { id: 1, name: "Test Item" };
-    
-        wrapper?.vm.helpers.addToTanstackCache({ items: [item] });
-    
-        queryClient.invalidateQueries({ queryKey: ["testCache"] });
-    
-        const data = queryClient.getQueryData(["testCache"]);
-    
-        setTimeout(() => {
-            expect(data).not.toBeUndefined();
-            expect(data).toBeInstanceOf(Array);
-            expect(data).toContainEqual(item);
-        }, 1000)
-      });
-})
+  it('adds item to the front', async () => {
+    const wrapper = mount(AddToFront, { global: { plugins: [VueQueryPlugin] } });
+
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.addItemToFront();
+    await expect.poll(() => {
+        const text = wrapper.text();
+        const firstIndex = text.indexOf('Added First');
+        const secondIndex = text.indexOf('Original Item');
+        return firstIndex < secondIndex;
+      }, pollArgs).toBe(true)
+  });
+
+  it('adds item to the back', async () => {
+    const wrapper = mount(AddToBack, { global: { plugins: [VueQueryPlugin] } });
+
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.addItemToBack();
+    await expect.poll(() => {
+        const text = wrapper.text();
+        return text.indexOf('First') < text.indexOf('Last');
+    }, pollArgs).toBe(true);
+  });
+});

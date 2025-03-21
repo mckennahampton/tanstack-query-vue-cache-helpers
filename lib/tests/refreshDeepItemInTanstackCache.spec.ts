@@ -1,126 +1,41 @@
-import { mount } from "@vue/test-utils";
-import { defineComponent, h, ref } from "vue";
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
-import { useTanstackCacheHelpers } from "../composables/useTanstackQueryHelpers";
+import { mount } from '@vue/test-utils'
+import { describe, it, expect } from 'vitest'
+import { VueQueryPlugin } from '@tanstack/vue-query'
 
-const queryClient = new QueryClient();
+import UpdateNestedItem from './components/refreshDeepItemInTanstackCache/UpdateNestedItem.vue'
+import InsertNestedItem from './components/refreshDeepItemInTanstackCache/InsertNestedItem.vue'
+import AddRootLevelItem from './components/refreshDeepItemInTanstackCache/AddRootLevelItem.vue'
 
-// Utility to create a Vue component for testing
-const createTestComponent = (fn: () => any) =>
-  defineComponent({
-    setup: fn,
-    render: () => h("div"),
-  });
+const pollArgs = { interval: 100, timeout: 5000 }
 
-describe("refreshDeepItemInTanstackCache", () => {
-  let wrapper: any;
+describe('refreshDeepItemInTanstackCache', () => {
+  it('updates an existing nested item', async () => {
+    const wrapper = mount(UpdateNestedItem, { global: { plugins: [VueQueryPlugin] } })
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Child')
 
-  beforeEach(() => {
-    queryClient.clear();
-    wrapper = mount(
-      createTestComponent(() => {
-        const helpers = useTanstackCacheHelpers("testCache");
-        return { helpers };
-      }),
-      {
-        global: {
-          plugins: [VueQueryPlugin],
-        },
-      }
-    );
-  });
+    await wrapper.vm.updateChild()
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Child')
+  })
 
-  it("should update an existing deep item", async () => {
-    const initialData = [
-      {
-        id: 1,
-        name: "Parent",
-        children: [{ id: 2, name: "Child 1" }],
-      },
-    ];
+  it('inserts a new nested item if not found', async () => {
+    const wrapper = mount(InsertNestedItem, { global: { plugins: [VueQueryPlugin] } })
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('New Child')
 
-    const updatedChild = { id: 2, name: "Updated Child 1" };
+    await wrapper.vm.insertChild()
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Child')
+  })
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-    await wrapper.vm.helpers.refreshDeepItemInTanstackCache({
-      item: updatedChild,
-      childKey: "children",
-      parentKey: "id",
-    });
+  it('adds a root-level item if no parentId', async () => {
+    const wrapper = mount(AddRootLevelItem, { global: { plugins: [VueQueryPlugin] } })
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('New Root')
 
-    const cacheData = queryClient.getQueryData(["testCache"]);
-    setTimeout(() => {
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData[0].children).toContainEqual(updatedChild);
-        }
-    }, 1000);
-  });
-
-  it("should insert a new deep item if it does not exist", async () => {
-    const initialData = [
-      {
-        id: 1,
-        name: "Parent",
-        children: [{ id: 2, name: "Child 1" }],
-      },
-    ];
-
-    const newChild = { id: 3, name: "New Child" };
-
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-    await wrapper.vm.helpers.refreshDeepItemInTanstackCache({
-      item: newChild,
-      childKey: "children",
-      parentKey: "id",
-    });
-
-    const cacheData = queryClient.getQueryData(["testCache"]);
-    setTimeout(() => {
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData[0].children).toContainEqual(newChild);
-        }
-    }, 1000);
-  });
-
-  it("should not modify cache if the item is identical", async () => {
-    const initialData = [
-      {
-        id: 1,
-        name: "Parent",
-        children: [{ id: 2, name: "Child 1" }],
-      },
-    ];
-
-    const identicalChild = { id: 2, name: "Child 1" };
-
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-    await wrapper.vm.helpers.refreshDeepItemInTanstackCache({
-      item: identicalChild,
-      childKey: "children",
-      parentKey: "id",
-    });
-
-    const cacheData = queryClient.getQueryData(["testCache"]);
-    setTimeout(() => {
-        expect(cacheData).toEqual(initialData);
-    }, 1000);
-  });
-
-  it("should add root-level items if parentKey is null", async () => {
-    const newRootItem = { id: 10, name: "New Root Item" };
-
-    await wrapper.vm.helpers.refreshDeepItemInTanstackCache({
-      item: newRootItem,
-      childKey: "children",
-      parentKey: null,
-    });
-
-    const cacheData = queryClient.getQueryData(["testCache"]);
-    setTimeout(() => {
-        expect(cacheData).toContainEqual(newRootItem);
-    }, 1000);
-  });
-});
+    await wrapper.vm.addRoot()
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Root')
+  })
+})

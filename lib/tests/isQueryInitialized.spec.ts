@@ -1,52 +1,25 @@
-import { mount } from '@vue/test-utils'
-import { defineComponent, h } from 'vue'
-import { describe, it, expect, beforeEach } from 'vitest'
-import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
-import { useTanstackCacheHelpers } from '../composables/useTanstackQueryHelpers'
+import { mount } from "@vue/test-utils";
+import { describe, it, expect } from "vitest";
+import { VueQueryPlugin } from "@tanstack/vue-query";
+import IsQueryInitialized from "./components/isQueryInitialized/IsQueryInitialized.vue";
 
-const queryClient = new QueryClient();
-
-const createTestComponent = (fn: () => any) => {
-  return defineComponent({
-    setup() {
-      return fn();
-    },
-    render() {
-      return h("div");
-    },
-  });
-}
+const pollArgs = {
+  interval: 250,
+  timeout: 10000,
+};
 
 describe("isQueryInitialized", () => {
-  let wrapper: any;
-  
-  beforeEach(() => {
-    queryClient.clear();
-    wrapper = mount(
-      createTestComponent(() => {
-        const helpers = useTanstackCacheHelpers("testCache");
-        return { helpers };
-      }),
-      {
-        global: {
-          plugins: [[VueQueryPlugin, { queryClient }]],
-        },
-      }
-    );
-  })
-  
-  it("should return false when query is not initialized", async () => {
-    const isInitialized = wrapper.vm.helpers.isQueryInitialized();
-    expect(isInitialized).toBe(false);
-  });
+  it("returns false before query is initialized, and true after", async () => {
+    const wrapper = mount(IsQueryInitialized, {
+      global: { plugins: [VueQueryPlugin] },
+    });
 
-  it("should return true when query is initialized", async () => {
-    // Set some initial data
-    queryClient.setQueryData(["testCache"], [{ id: 1, name: "Test Item" }]);
-    
-    setTimeout(() => {
-        const isInitialized = wrapper.vm.helpers.isQueryInitialized();
-        expect(isInitialized).toBe(true);
-      }, 1000);
+    // Should initially return false
+    expect(wrapper.vm.isQueryInitialized()).toBe(false);
+    expect(wrapper.find('[data-testid="status"]').text()).toBe("false");
+
+    // Wait until the query is loaded
+    await expect.poll(() => wrapper.find('[data-testid="status"]').text(), pollArgs).toBe("true");
+    expect(wrapper.vm.isQueryInitialized()).toBe(true);
   });
 });

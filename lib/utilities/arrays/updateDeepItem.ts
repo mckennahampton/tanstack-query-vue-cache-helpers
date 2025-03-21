@@ -20,12 +20,13 @@ export const updateDeepItem = <T>({
     identityKey = 'id' as keyof T
 }: UpdateDeepItemArgs<T>) => {
 
-    let target = findRecursive({ array: array, identityKey, target: item, childKey: childKey})
+    let target = findRecursive({ array: array, identityKey, target: item[identityKey], childKey: childKey})
     if (target)
     {
         // The item has potentially moved, so we need to handle that use-case
         if (target[parentKey] != item[parentKey])
         {
+
             // Simplest move is to just remove the old object from it's current parent...
             removeDeepItem({
                 array: array,
@@ -47,6 +48,7 @@ export const updateDeepItem = <T>({
 
         else
         {
+            console.log('Updating item in-place', target, item)
             // Update the item in-place & retain reactivity
             Object.assign(target, item)
         }

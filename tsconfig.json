@@ -25,7 +25,7 @@
         "lib/**/*.tsx",
         "lib/**/*.vue",
         "node_modules/@types/**/*.ts"
-, "lib/composables/useTanstackQueryHelpers.test.ts_old", "lib/tests/refreshPartialItemInTanstackCache.spec.ts_old"    ],
+, "lib/composables/useTanstackQueryHelpers.test.ts_old", "lib/tests/refreshPartialItemInTanstackCache.spec.ts_old", "lib/tests/addToTanstackCache.spec.ts_old", "lib/tests/isQueryInitialized.spec.ts_old", "lib/tests/mutationFactory.spec.ts_old", "lib/tests/refreshDeepItemInTanstackCache.spec.ts_old"    ],
     "references": [
         { "path": "./tsconfig.app.json" },
         { "path": "./tsconfig.node.json" }

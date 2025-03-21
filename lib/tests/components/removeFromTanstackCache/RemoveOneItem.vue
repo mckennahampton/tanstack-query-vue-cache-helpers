@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
 
-const queryKey = "RemoveOneItemAndLeaveOneItem";
+const queryKey = "RemoveOneItem";
 const helpers = useTanstackCacheHelpers(queryKey);
 const query = queryFactory({
     queryKey: queryKey,

@@ -1,41 +1,19 @@
-import { mount } from "@vue/test-utils";
-import { defineComponent, h } from "vue";
-import { describe, it, expect, beforeEach } from "vitest";
-import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
-import { useTanstackCacheHelpers } from "../composables/useTanstackQueryHelpers";
+import { mount } from '@vue/test-utils';
+import { describe, it, expect } from 'vitest';
+import { VueQueryPlugin } from '@tanstack/vue-query';
+import ClearCache from './components/clearTanstackCache/ClearCache.vue';
 
-const queryClient = new QueryClient();
+const pollArgs = {
+  interval: 250,
+  timeout: 10000,
+};
 
-const createTestComponent = (fn: () => any) => defineComponent({
-    setup: fn,
-    render: () => h("div"),
-});
+describe('clearTanstackCache', () => {
+  it('clears cache', async () => {
+    const wrapper = mount(ClearCache, { global: { plugins: [VueQueryPlugin] } });
 
-describe("clearTanstackCache", () => {
-    let wrapper: any;
-
-    beforeEach(() => {
-        queryClient.clear();
-        wrapper = mount(createTestComponent(() => {
-            const helpers = useTanstackCacheHelpers("testCache");
-            return { helpers };
-        }), {
-            global: {
-                plugins: [VueQueryPlugin],
-            },
-        });
-
-        queryClient.setQueryData(["testCache"], [{ id: 1, name: "Test Item" }]);
-    });
-
-    it("should clear the cache", async () => {
-        wrapper.vm.helpers.clearTanstackCache();
-
-        queryClient.invalidateQueries({ queryKey: ["testCache"] });
-
-        setTimeout(() => {
-            const data = queryClient.getQueryData(["testCache"]);
-            expect(data).toEqual([]);
-        }, 1000);
-    });
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.helpers.clearTanstackCache();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('No Items');
+  });
 });

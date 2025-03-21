@@ -1,134 +1,72 @@
-import { mount } from "@vue/test-utils";
-import { defineComponent, h } from "vue";
-import { describe, it, expect, beforeEach } from "vitest";
-import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
-import { useTanstackCacheHelpers } from "../composables/useTanstackQueryHelpers";
+import { mount } from '@vue/test-utils'
+import { describe, it, expect } from 'vitest'
+import { VueQueryPlugin } from '@tanstack/vue-query'
+import ReplaceSubArray from './components/refreshPartialItemInTanstackCache/ReplaceSubArray.vue'
+import ReplaceSubArrayNoMatch from './components/refreshPartialItemInTanstackCache/ReplaceSubArrayNoMatch.vue'
+import ReplaceSingleObject from './components/refreshPartialItemInTanstackCache/ReplaceSingleObject.vue'
+import ReplaceArrayAsObject from './components/refreshPartialItemInTanstackCache/ReplaceArrayAsObject.vue'
 
-const queryClient = new QueryClient();
+const pollArgs = { interval: 250, timeout: 5000 }
 
-// Utility to create a Vue component for testing
-const createTestComponent = (fn: () => any) =>
-  defineComponent({
-    setup: fn,
-    render: () => h("div"),
-  });
-
-describe("refreshPartialItemInTanstackCache", () => {
-  let wrapper: any;
-
-  beforeEach(() => {
-    queryClient.clear();
-    wrapper = mount(
-      createTestComponent(() => {
-        const helpers = useTanstackCacheHelpers("testCache");
-        return { helpers };
-      }),
-      {
-        global: {
-          plugins: [VueQueryPlugin],
-        },
-      }
-    );
-  });
-
-  it("should update an existing item's field with new content", async () => {
-    const initialData = [{ id: 1, name: "Old Name", description: "Old Description" }];
-    
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-
-    await wrapper.vm.helpers.refreshPartialItemInTanstackCache({
-      targetKeyValue: 1,
-      replacementKey: "name",
-      replacementContent: "New Name",
+describe('refreshPartialItemInTanstackCache', () => {
+  it('updates sub-array within a target item', async () => {
+    const wrapper = mount(ReplaceSubArray, {
+      global: { plugins: [VueQueryPlugin] },
     });
 
-    const cacheData = queryClient.getQueryData(["testCache"]);
-    setTimeout(() => {
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData).toContainEqual({ id: 1, name: "New Name", description: "Old Description" });
-        }
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Old Sub 1');
+    await wrapper.vm.update();
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Old Sub 2');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Sub 2');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Sub 3');
   });
 
-  it("should append items to an array field instead of replacing it", async () => {
-    const initialData = [{ id: 1, tags: ["tag1"] }];
-
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-
-    await wrapper.vm.helpers.refreshPartialItemInTanstackCache({
-      targetKeyValue: 1,
-      replacementKey: "tags",
-      replacementContent: ["tag2"],
+  it('replaces the entire sub-array when no identities match', async () => {
+    const wrapper = mount(ReplaceSubArrayNoMatch, {
+      global: { plugins: [VueQueryPlugin] },
     });
 
-    const cacheData = queryClient.getQueryData(["testCache"]);
-    setTimeout(() => {
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData[0].tags).toEqual(["tag1", "tag2"]);
-        }
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Old Sub 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Old Sub 2');
+    await wrapper.vm.update();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Old Sub 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Old Sub 2');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Sub 3');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Sub 4');
   });
 
-  it("should treat an empty array as an object when needed", async () => {
-    const initialData = [{ id: 1, settings: [] }];
-
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-
-    await wrapper.vm.helpers.refreshPartialItemInTanstackCache({
-      targetKeyValue: 1,
-      replacementKey: "settings",
-      replacementContent: { theme: "dark" },
-      treatArrayAsObject: true,
+  it('replaces a single object property within the target item', async () => {
+    const wrapper = mount(ReplaceSingleObject, {
+      global: { plugins: [VueQueryPlugin] },
     });
 
-    const cacheData = queryClient.getQueryData(["testCache"]);
-    setTimeout(() => {
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData[0].settings).toEqual({ theme: "dark" });
-        }
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Old Info');
+    await wrapper.vm.update();
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Old Info');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Info');
   });
 
-  it("should do nothing if the target item is not found", async () => {
-    const initialData = [{ id: 1, name: "Original Name" }];
-
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-
-    await wrapper.vm.helpers.refreshPartialItemInTanstackCache({
-      targetKeyValue: 99, // Non-existent ID
-      replacementKey: "name",
-      replacementContent: "New Name",
+  it('replaces the entire object-like subfield when treatArrayAsObject is true', async () => {
+    const wrapper = mount(ReplaceArrayAsObject, {
+      global: { plugins: [VueQueryPlugin] },
     });
 
-    const cacheData = queryClient.getQueryData(["testCache"]);
-    setTimeout(() => {
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData).toEqual(initialData); // Should remain unchanged
-        }
-    }, 1000);
-  });
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
 
-  it("should update a nested field without affecting other data", async () => {
-    const initialData = [{ id: 1, profile: { age: 25, city: "New York" } }];
+    // Wait for initial data
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Old Sub 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Old Sub 2');
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
+    // Trigger update
+    await wrapper.vm.update();
 
-    await wrapper.vm.helpers.refreshPartialItemInTanstackCache({
-      targetKeyValue: 1,
-      replacementKey: "profile",
-      replacementContent: { age: 30 },
-    });
-
-    const cacheData = queryClient.getQueryData(["testCache"]);
-    setTimeout(() => {
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData[0].profile).toEqual({ age: 30, city: "New York" }); // City remains unchanged
-        }
-    }, 1000);
+    // Assert old values removed and new ones added
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Old Sub 1');
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Old Sub 2');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Sub 2');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Sub 3');
   });
 });

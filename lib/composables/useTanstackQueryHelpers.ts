@@ -24,7 +24,6 @@ export const queryFactory = <T>(config: {
 }) => {
     const { queryKey, queryFn } = config;
     const initialData = config.useInitialData ? usePage().props[queryKey] as MaybeRefDeep<T[] | InitialDataFunction<T[]>> : false
-    
     return useQuery({
         queryKey: [queryKey],
         queryFn,
@@ -125,15 +124,12 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
         // Get the current data of the query
         let currentData = queryClient.getQueryData(queryKey)
         // Add the new item to the cache
-        // if (currentData) {
+        if (currentData) {
             await queryClient.setQueryData(
                 queryKey,
-                (array: T[]) => {
-                    let data = Array.isArray(array) ? [...array] : []
-                    return placement == 'start' ? [item, ...data] : [...data, item]
-                }
+                (array: T[]) => placement == 'start' ? [item, ...array] : [...array, item]
             )
-        // }
+        }
 
         await nextTick();
     }
@@ -260,7 +256,6 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
                     const reactiveArrayCopy = ref<T[]>([]) as Ref<T[]>
                     data.forEach(item => reactiveArrayCopy.value.push(item))
 
-
                     if (item[parentKey])
                     {   
                         let targetItem = findRecursive({
@@ -272,7 +267,7 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
 
                         if (targetItem)
                         {
-
+                            console.log('calling udpateDeepItem')
                             updateDeepItem({
                                 array: reactiveArrayCopy,
                                 item: item,
@@ -299,6 +294,7 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
                     {
                         refreshArray({ array: reactiveArrayCopy, newItems: [item] })
                     }
+
                     return reactiveArrayCopy.value
                 }
             )

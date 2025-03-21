@@ -13,5 +13,5 @@
     "emitDeclarationOnly": true, // use this field instead of "noEmit"
     "noEmit": false,
   },
-  "include": ["lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.vue", "lib/composables/useTanstackQueryHelpers.test.ts_old", "lib/tests/refreshPartialItemInTanstackCache.spec.ts_old"]
+  "include": ["lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.vue", "lib/composables/useTanstackQueryHelpers.test.ts_old", "lib/tests/refreshPartialItemInTanstackCache.spec.ts_old", "lib/tests/addToTanstackCache.spec.ts_old", "lib/tests/isQueryInitialized.spec.ts_old", "lib/tests/mutationFactory.spec.ts_old", "lib/tests/refreshDeepItemInTanstackCache.spec.ts_old"]
 }

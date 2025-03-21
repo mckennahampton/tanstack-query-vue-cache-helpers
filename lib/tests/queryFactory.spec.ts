@@ -1,132 +1,46 @@
-import { mount } from "@vue/test-utils";
-import { defineComponent, h, ref } from "vue";
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
-import { queryFactory } from "../composables/useTanstackQueryHelpers";
-import { usePage } from "@inertiajs/vue3";
+import { mount } from '@vue/test-utils'
+import { describe, it, expect, vi } from 'vitest'
+import { VueQueryPlugin } from '@tanstack/vue-query'
+import QueryFnOnly from './components/queryFactory/QueryFnOnly.vue'
+import QueryWithInitialData from './components/queryFactory/QueryWithInitialData.vue'
+import QueryWithConfig from './components/queryFactory/QueryWithConfig.vue'
+import QueryRefetch from './components/queryFactory/QueryRefetch.vue'
 
+const pollArgs = { interval: 250, timeout: 10000 }
 // Mock usePage to return test data
 vi.mock("@inertiajs/vue3", () => ({
     usePage: vi.fn(() => ({
         props: {
-            testQuery: [{ id: 1, name: "Initial Item" }]
+            QueryWithInitialData: [{ id: 1, name: "Initial Item" }]
         }
     }))
 }));
 
-const queryClient = new QueryClient();
+describe('queryFactory', () => {
+  it('initializes with queryFn data', async () => {
+    const wrapper = mount(QueryFnOnly, { global: { plugins: [VueQueryPlugin] } })
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('From QueryFn')
+  })
 
-const createTestComponent = (fn: () => any) => defineComponent({
-    setup: fn,
-    render: () => h("div"),
-});
+  it('uses initialData from page props', async () => {
+    const wrapper = mount(QueryWithInitialData, { global: { plugins: [VueQueryPlugin] } })
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Initial Item')
+  })
 
-describe("queryFactory", () => {
-    let wrapper: any;
+  it('applies aditionalConfig properly', async () => {
+    const wrapper = mount(QueryWithConfig, { global: { plugins: [VueQueryPlugin] } })
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Configurable')
+  })
 
-    beforeEach(() => {
-        queryClient.clear();
-    });
+  it('refetches and updates query data', async () => {
+    const wrapper = mount(QueryRefetch, { global: { plugins: [VueQueryPlugin] } })
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Fetched1')
 
-    it("should initialize with query function", async () => {
-        const queryFn = vi.fn().mockResolvedValue([{ id: 1, name: "Test Item" }]);
-
-        wrapper = mount(createTestComponent(() => {
-            const query = queryFactory({ queryKey: "testQuery", queryFn });
-            return { query };
-        }), {
-            global: {
-                plugins: [VueQueryPlugin],
-            },
-        });
-
-        await queryClient.invalidateQueries({ queryKey: ["testQuery"] });
-
-        setTimeout(() => {
-            expect(queryFn).toHaveBeenCalled();
-            expect(wrapper.vm.query.data.value).toEqual([{ id: 1, name: "Test Item" }]);
-        }, 1000);
-    });
-
-    it("should use initial data if provided", async () => {
-        const queryFn = vi.fn().mockResolvedValue([{ id: 2, name: "Fetched Item" }]);
-
-        wrapper = mount(createTestComponent(() => {
-            const query = queryFactory({ queryKey: "testQuery", queryFn, useInitialData: true });
-            return { query };
-        }), {
-            global: {
-                plugins: [VueQueryPlugin],
-            },
-        });
-
-        await queryClient.invalidateQueries({ queryKey: ["testQuery"] });
-
-        setTimeout(() => {
-            expect(wrapper.vm.query.data.value).toEqual([{ id: 1, name: "Initial Item" }]); // Initial data should be used
-        }, 1000);
-    });
-
-    it("should update data when query function fetches new data", async () => {
-        const queryFn = vi.fn().mockResolvedValue([{ id: 3, name: "Updated Item" }]);
-
-        wrapper = mount(createTestComponent(() => {
-            const query = queryFactory({ queryKey: "testQuery", queryFn });
-            return { query };
-        }), {
-            global: {
-                plugins: [VueQueryPlugin],
-            },
-        });
-
-        await queryClient.invalidateQueries({ queryKey: ["testQuery"] });
-
-        setTimeout(() => {
-            expect(wrapper.vm.query.data.value).toEqual([{ id: 3, name: "Updated Item" }]);
-        }, 1000);
-    });
-
-    it("should respect additional configuration", async () => {
-        const queryFn = vi.fn().mockResolvedValue([{ id: 4, name: "Configured Item" }]);
-
-        wrapper = mount(createTestComponent(() => {
-            const query = queryFactory({ 
-                queryKey: "testQuery", 
-                queryFn, 
-                aditionalConfig: { staleTime: 5000 } 
-            });
-            return { query };
-        }), {
-            global: {
-                plugins: [VueQueryPlugin],
-            },
-        });
-
-        await queryClient.invalidateQueries({ queryKey: ["testQuery"] });
-
-        setTimeout(() => {
-            expect(wrapper.vm.query.options.staleTime).toBe(5000);
-        }, 1000);
-    });
-
-    it("should return expected structure", async () => {
-        const queryFn = vi.fn().mockResolvedValue([]);
-
-        wrapper = mount(createTestComponent(() => {
-            const query = queryFactory({ queryKey: "testQuery", queryFn });
-            return { query };
-        }), {
-            global: {
-                plugins: [VueQueryPlugin],
-            },
-        });
-
-        await queryClient.invalidateQueries({ queryKey: ["testQuery"] });
-
-        setTimeout(() => {
-            expect(wrapper.vm.query).toHaveProperty("data");
-            expect(wrapper.vm.query).toHaveProperty("isLoading");
-            expect(wrapper.vm.query).toHaveProperty("isError");
-        }, 1000);
-    });
-});
+    await wrapper.vm.refetch()
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Fetched2')
+  })
+})
