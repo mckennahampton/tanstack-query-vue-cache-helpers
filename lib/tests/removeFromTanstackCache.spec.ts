@@ -1,41 +1,38 @@
 import { mount } from "@vue/test-utils";
-import { defineComponent, h } from "vue";
-import { describe, it, expect, beforeEach } from "vitest";
-import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
-import { useTanstackCacheHelpers } from "../composables/useTanstackQueryHelpers";
+import { describe, it, expect } from "vitest";
+import { VueQueryPlugin } from "@tanstack/vue-query";
+import RemoveOneItemAndLeaveOneItem from "./components/removeFromTanstackCache/RemoveOneItemAndLeaveOneItem.vue";
+/**  
+ * Working with the Tanstack Query Cache in the Vitest environment
+ * takes a wide range of varrying times to complete. The only
+ * way to ensure that the test waits for everything to complete
+ * is to use the `await expect.poll` method. This method will
+ * poll the function passed to it until the function returns
+ * the expected value or the timeout is reached.
+ * 
+ * Also, Tanstack Query Cache does not seem to play well unless
+ * the entire process is completed in a SFC combined with polling.
+ */
 
-const queryClient = new QueryClient();
-
-const createTestComponent = (fn: () => any) => defineComponent({
-    setup: fn,
-    render: () => h("div"),
-});
-
-describe("removeFromTanstackCache", () => {
-    let wrapper: any;
-
-    beforeEach(() => {
-        queryClient.clear();
-        wrapper = mount(createTestComponent(() => {
-            const helpers = useTanstackCacheHelpers("testCache");
-            return { helpers };
-        }), {
+describe('removeFromTanstackCache Component', () => {
+    it('Component test', async() => {
+        const wrapper = mount(RemoveOneItemAndLeaveOneItem, {
             global: {
                 plugins: [VueQueryPlugin],
             },
         });
 
-        queryClient.setQueryData(["testCache"], [{ id: 1, name: "Item to Remove" }]);
-    });
+        await expect.poll(() => wrapper.text(), {
+            interval: 250,
+            timeout: 100000,
+        }).toContain('Item to Keep');
 
-    it("should remove an item from the cache", async () => {
-        wrapper.vm.helpers.removeFromTanstackCache({ target: 1 });
-
-        queryClient.invalidateQueries({ queryKey: ["testCache"] });
-
-        setTimeout(() => {
-            const data = queryClient.getQueryData(["testCache"]);
-            expect(data).not.toContainEqual({ id: 1, name: "Item to Remove" });
-        }, 1000);
+        await expect.poll(() => {
+            wrapper.vm.removeItem()
+            return wrapper.text()
+        }, {
+            interval: 250,
+            timeout: 100000,
+        }).not.toContain('Item to Remove');
     });
 });

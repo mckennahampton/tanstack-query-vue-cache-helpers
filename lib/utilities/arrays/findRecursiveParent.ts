@@ -44,7 +44,7 @@ export function findRecursiveParent<T, U>({
         childKey: keyof T
     ): T | null
     {
-        if ((obj[childKey] as T[]).some(child => child[targetKey] === targetValue))
+        if ((obj[childKey] as T[])?.some(child => child[targetKey] === targetValue))
         {
             // return (obj[childKey] as T[]).find(child => child[targetKey] === targetValue)
             return obj as T

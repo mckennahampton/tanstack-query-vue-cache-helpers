@@ -12,9 +12,9 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     coverage: {
       reporter: ['text', 'json', 'html'],
-      provider: 'istanbul',
+      provider: 'v8',
       enabled: true,
-      include: ['**/*.spec.ts'],
+      include: ['**/*.ts'],
     }
   },
   resolve: {

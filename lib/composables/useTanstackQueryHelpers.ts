@@ -123,15 +123,17 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
     const addToTanstackCache = async ({ item, placement = 'start' }: AddToTanstackCacheOptions<T>) => {
     
         // Get the current data of the query
-        const currentData = queryClient.getQueryData(queryKey)
-          
+        let currentData = queryClient.getQueryData(queryKey)
         // Add the new item to the cache
-        if (currentData) {
+        // if (currentData) {
             await queryClient.setQueryData(
                 queryKey,
-                (array: T[]) => placement == 'start' ? [item, ...array] : [...array, item]
+                (array: T[]) => {
+                    let data = Array.isArray(array) ? [...array] : []
+                    return placement == 'start' ? [item, ...data] : [...data, item]
+                }
             )
-        }
+        // }
 
         await nextTick();
     }
@@ -143,33 +145,40 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
         const currentData = queryClient.getQueryData(queryKey)
           
         // Add the new item to the cache
-        if (currentData) {
+        // if (currentData) {
             queryClient.setQueryData(
                 queryKey,
-                (array: T[]) => array.map(_item => _item[identityKey] === item[identityKey] ? item : _item)
+                (array: T[]) => {
+                    let data = Array.isArray(array) ? [...array] : []
+                    return data.map(_item => _item[identityKey] === item[identityKey] ? item : _item)
+                }
             )
-        }
+        // }
 
         await nextTick();
     }
 
     const removeFromTanstackCache = async ({ target, identityKey = 'id' as keyof T }: RemoveFromTanstackCacheOptions<T>) => {
+        
         // Get the current data of the query
         const currentData = queryClient.getQueryData(queryKey)
           
         // Add the new item to the cache
-        if (currentData) {
+        // if (currentData) {
             queryClient.setQueryData(
-                queryKey,
-                (array: T[]) => array.filter(item => {
-                    if (Array.isArray(target)) {
-                        //@ts-ignore
-                        return !target.includes(item[identityKey])
-                    }
-                    return item[identityKey] !== target
-                })
+                [queryKey],
+                (array: T[]) => {
+                    let data = Array.isArray(array) ? [...array] : []
+                    return data.filter(item => {
+                        if (Array.isArray(target)) {
+                            //@ts-ignore
+                            return !target.includes(item[identityKey])
+                        }
+                        return item[identityKey] !== target
+                    })
+                }
             )
-        }
+        // }
 
         await nextTick();
     }
@@ -179,12 +188,12 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
         const currentData = queryClient.getQueryData(queryKey)
           
         // Add the new item to the cache
-        if (currentData) {
+        // if (currentData) {
             queryClient.setQueryData(
                 queryKey,
                 []
             )
-        }
+        // }
 
         await nextTick();
     }
@@ -197,7 +206,7 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
     }: RefreshTanstackCacheOptions<T>) => {
         // Get the current data of the query
         const currentData = queryClient.getQueryData(queryKey)
-        if (currentData) {
+        // if (currentData) {
             queryClient.setQueryData(
                 queryKey,
                 (array: T[]) => {
@@ -205,7 +214,7 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
                     items.forEach(newItem => {
 
                         // Update anything that already exists
-                        let index = array.findIndex(item => newItem[identityKey] == item[identityKey])
+                        let index = temp.findIndex(item => newItem[identityKey] == item[identityKey])
                         if (index != -1) {
                             // console.log(`Updating item in cache: ${newItem[identityKey]}`, newItem, array[index])
                             temp.splice(index, 1, newItem)
@@ -233,7 +242,7 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
             )
 
             await nextTick();
-        }
+        // }
     }
 
     const refreshDeepItemInTanstackCache = async ({
@@ -243,12 +252,13 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
         identityKey = 'id' as keyof T
     }: RefreshDeepItemInTanstackCache<T>) => {
         const currentData = queryClient.getQueryData(queryKey)
-        if (currentData) {
+        // if (currentData) {
             queryClient.setQueryData(
                 queryKey,
                 (array: T[]) => {
+                    let data = Array.isArray(array) ? [...array] : []
                     const reactiveArrayCopy = ref<T[]>([]) as Ref<T[]>
-                    array.forEach(item => reactiveArrayCopy.value.push(item))
+                    data.forEach(item => reactiveArrayCopy.value.push(item))
 
 
                     if (item[parentKey])
@@ -292,7 +302,7 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
                     return reactiveArrayCopy.value
                 }
             )
-        }
+        // }
 
         await nextTick();
     }
@@ -304,12 +314,13 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
         identityKey = 'id' as keyof T
     }: RemoveDeepItemFromTanstackCacheOptions<T>) => {
         const currentData = queryClient.getQueryData(queryKey)
-        if (currentData) {
+        // if (currentData) {
             queryClient.setQueryData(
                 queryKey,
                 (array: T[]) => {
+                    let data = Array.isArray(array) ? [...array] : []
                     const reactiveArrayCopy = ref<T[]>([]) as Ref<T[]>
-                    array.forEach(item => reactiveArrayCopy.value.push(item))
+                    data.forEach(item => reactiveArrayCopy.value.push(item))
 
                     removeDeepItem({
                         array: reactiveArrayCopy,
@@ -322,7 +333,7 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
                     return reactiveArrayCopy.value
                 }
             )
-        }
+        // }
 
         await nextTick();
     }
@@ -337,13 +348,14 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
         debug = false
     }: RefreshPartialItemInTanstackCacheOptions<T, U>) => {
         const currentData = queryClient.getQueryData(queryKey)
-        if (currentData) {
+        // if (currentData) {
 
             queryClient.setQueryData(
                 queryKey,
-                (cache: T[]) => {
+                (array: T[]) => {
                     // Create a shallow copy of the cache array
-                    const newCacheArray = cache.map(item => ({ ...item }));
+                    let data = Array.isArray(array) ? [...array] : []
+                    const newCacheArray = data.map(item => ({ ...item }));
                     const target = newCacheArray.find(
                         item => JSON.stringify(item[identityKey]) === JSON.stringify(targetKeyValue)
                     );
@@ -370,7 +382,7 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
                     return newCacheArray
                 }
             );
-        }
+        // }
 
         await nextTick();
     }
@@ -388,13 +400,13 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
         removalKeyValue // value of U['id']
     }: RemoveArrayItemOptions<T, U>) => {
         const currentData = queryClient.getQueryData(queryKey)
-        if (currentData) {
+        // if (currentData) {
             queryClient.setQueryData(
                 queryKey,
-                (cache: T[]) => {
-
+                (array: T[]) => {
+                    let data = Array.isArray(array) ? [...array] : []
                     // Create a shallow copy of the cache array
-                    const newCacheArray = cache.map(item => ({ ...item }));
+                    const newCacheArray = data.map(item => ({ ...item }));
                     const target = newCacheArray.find(
                         item => JSON.stringify(item[identityKey]) === JSON.stringify(targetKeyValue)
                     );
@@ -429,7 +441,7 @@ export const useTanstackCacheHelpers = <T extends object>(queryKey: any) => {
                     return newCacheArray
                 }
             )
-        }
+        // }
 
         await nextTick();
     }
