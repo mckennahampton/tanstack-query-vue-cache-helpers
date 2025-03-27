@@ -2,7 +2,7 @@
 import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
 
 const queryKey = "RemoveMissingItem";
-const helpers = useTanstackCacheHelpers(queryKey);
+const helpers = useTanstackCacheHelpers([queryKey]);
 
 const query = queryFactory({
   queryKey,
@@ -15,7 +15,7 @@ const removeMissing = async () => {
   await helpers.removeFromTanstackCache({ target: 999 });
 };
 
-defineExpose({ removeMissing });
+defineExpose({ removeMissing, helpers });
 </script>
 <template>
     <div>{{ query.data }}</div>

@@ -1,18 +1,8 @@
 <script setup lang="ts">
 import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
 
-const queryKey = "RemoveOneItem";
+const queryKey = "RemoveFromUninitializedCache";
 const helpers = useTanstackCacheHelpers([queryKey]);
-const query = queryFactory({
-    queryKey: queryKey,
-    queryFn: () => new Promise<{ id: number, name: string }[]>((resolve) => {
-        resolve([
-            { id: 1, name: "Item to Remove" },
-            { id: 2, name: "Item to Keep" },
-        ]);
-    }),
-})
-
 
 const removeItem = async () => {
     helpers.removeFromTanstackCache({ target: 1 });
@@ -20,12 +10,12 @@ const removeItem = async () => {
 
 defineExpose({
     removeItem,
-    query,
+    // query,
     helpers
 })
 </script>
 <template>
-    <div :key="JSON.stringify(query.data)">
+    <!-- <div>
         {{ query.data }}
-    </div>
+    </div> -->
 </template>

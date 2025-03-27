@@ -2,7 +2,7 @@
 import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
 
 const queryKey = "RemoveCustomKey";
-const helpers = useTanstackCacheHelpers<{ uuid: string, name: string}>(queryKey);
+const helpers = useTanstackCacheHelpers<{ uuid: string, name: string}>([queryKey]);
 
 const query = queryFactory({
   queryKey,
@@ -16,7 +16,7 @@ const removeCustom = async () => {
   await helpers.removeFromTanstackCache({ target: "abc", identityKey: "uuid" });
 };
 
-defineExpose({ removeCustom });
+defineExpose({ removeCustom, helpers });
 </script>
 <template>
   <div>{{ query.data }}</div>

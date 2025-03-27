@@ -2,7 +2,7 @@
 import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
 
 const queryKey = "RemoveMultipleItems";
-const helpers = useTanstackCacheHelpers(queryKey);
+const helpers = useTanstackCacheHelpers([queryKey]);
 
 const query = queryFactory({
   queryKey,
