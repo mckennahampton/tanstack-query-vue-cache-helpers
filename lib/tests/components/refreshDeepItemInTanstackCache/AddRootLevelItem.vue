@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { queryFactory, useTanstackCacheHelpers } from '../../../composables/useTanstackQueryHelpers'
+import { useTanstackCacheHelpers } from '../../../composables/useTanstackCacheHelpers'
+import { useQuery } from '@tanstack/vue-query'
 
 interface Item {
   id: number
@@ -8,10 +9,10 @@ interface Item {
   children?: Item[]
 }
 
-const queryKey = 'AddRootLevelItem';
-const helpers = useTanstackCacheHelpers<Item>([queryKey]);
+const queryKey = ['AddRootLevelItem'];
+const helpers = useTanstackCacheHelpers<Item>(queryKey);
 
-const query = queryFactory<Item>({
+const query = useQuery<Item[], Error, Item[]>({
   queryKey,
   queryFn: () => Promise.resolve([
     { id: 1, name: 'Existing Root' }
@@ -19,7 +20,7 @@ const query = queryFactory<Item>({
 });
 
 const addRoot = async () => {
-  await helpers.refreshDeepItemInTanstackCache({
+  await helpers.refreshDeepItem({
     item: { id: 2, name: 'New Root' },
     childKey: 'children',
     parentKey: 'parentId'

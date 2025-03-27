@@ -1,43 +1,28 @@
 import { mount } from "@vue/test-utils";
-import { defineComponent, h } from "vue";
-import { describe, it, expect, beforeEach } from "vitest";
-import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
-import { useTanstackCacheHelpers } from "../composables/useTanstackQueryHelpers";
+import { describe, it, expect } from "vitest";
+import { VueQueryPlugin } from "@tanstack/vue-query";
+import UpdateItem from './components/updateItemInTanstackCache/UpdateItem.vue';
+import UpdateItemWithCustomId from './components/updateItemInTanstackCache/UpdateItemWithCustomId.vue';
 
-const queryClient = new QueryClient();
+const pollArgs = {
+  interval: 250,
+  timeout: 10000,
+};
 
-const createTestComponent = (fn: () => any) => defineComponent({
-    setup: fn,
-    render: () => h("div"),
-});
+describe('updateItemInCache tests', () => {
+  it('updates an existing item in the cache', async () => {
+    const wrapper = mount(UpdateItem, { global: { plugins: [VueQueryPlugin] } });
 
-describe("updateItemInTanstackCache", () => {
-    let wrapper: any;
-    
-    beforeEach(() => {
-        queryClient.clear();
-        wrapper = mount(createTestComponent(() => {
-            const helpers = useTanstackCacheHelpers("testCache");
-            return { helpers };
-        }), {
-            global: {
-                plugins: [VueQueryPlugin],
-            },
-        });
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.updateItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Item');
+  });
 
-        queryClient.setQueryData(["testCache"], [{ id: 1, name: "Old Item" }]);
-    });
+  it('updates an item using a custom identity key', async () => {
+    const wrapper = mount(UpdateItemWithCustomId, { global: { plugins: [VueQueryPlugin] } });
 
-    it("should update an existing item in the cache", async () => {
-        const updatedItem = { id: 1, name: "Updated Item" };
-
-        wrapper.vm.helpers.updateItemInTanstackCache({ item: updatedItem });
-
-        queryClient.invalidateQueries({ queryKey: ["testCache"] });
-
-        setTimeout(() => {
-            const data = queryClient.getQueryData(["testCache"]);
-            expect(data).toContainEqual(updatedItem);
-        }, 1000);
-    });
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.updateItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Item');
+  });
 });

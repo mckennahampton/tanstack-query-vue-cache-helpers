@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
+import { useTanstackCacheHelpers } from '../../../composables/useTanstackCacheHelpers'
+import { useQuery } from '@tanstack/vue-query'
 
 interface Item {
   id: number;
   detail: { info: string };
 }
-const queryKey = 'ReplaceSingleObject';
-const helpers = useTanstackCacheHelpers<Item>([queryKey]);
 
-const query = queryFactory<Item>({
+const queryKey = ['ReplaceSingleObject'];
+const helpers = useTanstackCacheHelpers<Item>(queryKey);
+
+const query = useQuery<Item[], Error, Item[]>({
   queryKey,
   queryFn: () =>
     Promise.resolve([
@@ -17,10 +19,10 @@ const query = queryFactory<Item>({
 });
 
 const update = async () => {
-  await helpers.refreshPartialItemInTanstackCache({
+  await helpers.refreshPartialItem({
     targetKeyValue: 1,
-    replacementKey: 'detail',
-    replacementContent: { info: 'Updated Info' },
+    updateKey: 'detail',
+    updatedContent: { info: 'Updated Info' },
   });
 };
 

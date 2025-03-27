@@ -1,15 +1,14 @@
-<!-- ./components/removeFromTanstackCache/RemoveMultipleByArray.vue -->
 <script setup lang="ts">
-import { queryFactory, useTanstackCacheHelpers } from '../../../composables/useTanstackQueryHelpers';
-
+import { useTanstackCacheHelpers } from '../../../composables/useTanstackCacheHelpers'
+import { useQuery } from '@tanstack/vue-query'
 interface Item {
   id: number;
   name: string;
 }
 
-const queryKey = "RemoveMultipleByArray";
+const queryKey = ["RemoveMultipleByArray"];
 
-const query = queryFactory<Item>({
+const query = useQuery<Item[], Error, Item[]>({
   queryKey,
   queryFn: () => Promise.resolve([
     { id: 1, name: 'Delete A' },
@@ -18,10 +17,10 @@ const query = queryFactory<Item>({
   ]),
 });
 
-const helpers = useTanstackCacheHelpers<Item>([queryKey]);
+const helpers = useTanstackCacheHelpers<Item>(queryKey);
 
 const removeMultiple = async () => {
-  await helpers.removeFromTanstackCache({ target: [1, 2] }); // triggers Array.isArray
+  await helpers.removeItem({ target: [1, 2] }); // triggers Array.isArray
 };
 
 defineExpose({

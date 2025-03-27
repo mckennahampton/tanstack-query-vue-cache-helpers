@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
+import { useTanstackCacheHelpers } from '../../../composables/useTanstackCacheHelpers'
+import { useQuery } from '@tanstack/vue-query'
 
-const queryKey = 'AddToFront';
-const helpers = useTanstackCacheHelpers([queryKey]);
+const queryKey = ['AddToFront'];
+const helpers = useTanstackCacheHelpers(queryKey);
 
-const query = queryFactory({
+const query = useQuery({
   queryKey,
   queryFn: () => Promise.resolve([{ id: 1, name: 'Added First' }, { id: 2, name: 'Original Item' }]),
 });

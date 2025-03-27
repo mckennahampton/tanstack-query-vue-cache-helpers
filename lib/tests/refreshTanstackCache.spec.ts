@@ -1,105 +1,58 @@
 import { mount } from "@vue/test-utils";
-import { defineComponent, h, ref } from "vue";
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
-import { useTanstackCacheHelpers } from "../composables/useTanstackQueryHelpers";
+import { describe, it, expect } from "vitest";
+import { VueQueryPlugin } from "@tanstack/vue-query";
+import UpdateExistingItems from './components/refreshTanstackCache/UpdateExistingItems.vue';
+import AddNewItems from './components/refreshTanstackCache/AddNewItems.vue';
+import AddToFront from './components/refreshTanstackCache/AddToFront.vue';
+import AddToBack from './components/refreshTanstackCache/AddToBack.vue';
+import EmptyArray from './components/refreshTanstackCache/EmptyArray.vue';
 
-const queryClient = new QueryClient();
-
-// Utility to create a Vue component for testing
-const createTestComponent = (fn: () => any) =>
-  defineComponent({
-    setup: fn,
-    render: () => h("div"),
-  });
+const pollArgs = {
+  interval: 250,
+  timeout: 10000,
+};
 
 describe("refreshTanstackCache", () => {
-  let wrapper: any;
-
-  beforeEach(() => {
-    queryClient.clear();
-    wrapper = mount(
-      createTestComponent(() => {
-        const helpers = useTanstackCacheHelpers("testCache");
-        return { helpers };
-      }),
-      {
-        global: {
-          plugins: [VueQueryPlugin],
-        },
-      }
-    );
-  });
-
   it("should update existing items in the cache", async () => {
-    const initialItems = [{ id: 1, name: "Item 1" }, { id: 2, name: "Item 2" }];
-    const updatedItem = { id: 1, name: "Updated Item 1" };
+    const wrapper = mount(UpdateExistingItems, { global: { plugins: [VueQueryPlugin] } });
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialItems });
-    await wrapper.vm.helpers.refreshTanstackCache({ items: [updatedItem] });
-
-
-    setTimeout(() => {
-        const cacheData = queryClient.getQueryData(["testCache"]);
-        expect(cacheData).toBeInstanceOf(Array);
-        expect(cacheData).toContainEqual(updatedItem);
-        expect(cacheData).toContainEqual(initialItems[1]); // Ensure other item is still present
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.updateItems();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Item 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Item 2');
   });
 
   it("should add new items to the cache", async () => {
-    const newItem = { id: 3, name: "New Item" };
+    const wrapper = mount(AddNewItems, { global: { plugins: [VueQueryPlugin] } });
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: [newItem] });
-
-    setTimeout(() => {
-        const cacheData = queryClient.getQueryData(["testCache"]);
-        expect(cacheData).toBeInstanceOf(Array);
-        expect(cacheData).toContainEqual(newItem);
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.addNewItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Item');
   });
 
   it("should add new items to the front when newItemsLocation is 'front'", async () => {
-    const initialItems = [{ id: 1, name: "Item 1" }];
-    const newItem = { id: 2, name: "New Item" };
+    const wrapper = mount(AddToFront, { global: { plugins: [VueQueryPlugin] } });
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialItems });
-    await wrapper.vm.helpers.refreshTanstackCache({ items: [newItem], newItemsLocation: "front" });
-
-    setTimeout(() => {
-        const cacheData = queryClient.getQueryData(["testCache"]);
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData[0]).toEqual(newItem); // New item should be at the front
-        }
-    }, 1000)
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.addToFront();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Item');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Item 1');
   });
 
   it("should add new items to the back when newItemsLocation is 'back'", async () => {
-    const initialItems = [{ id: 1, name: "Item 1" }];
-    const newItem = { id: 2, name: "New Item" };
+    const wrapper = mount(AddToBack, { global: { plugins: [VueQueryPlugin] } });
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialItems });
-    await wrapper.vm.helpers.refreshTanstackCache({ items: [newItem], newItemsLocation: "back" });
-
-    setTimeout(() => {
-        const cacheData = queryClient.getQueryData(["testCache"]);
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect([cacheData.length - 1]).toEqual(newItem); // New item should be at the back
-        }
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.addToBack();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Item 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Item');
   });
 
   it("should not modify cache if called with an empty array", async () => {
-    const initialItems = [{ id: 1, name: "Item 1" }];
-    
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialItems });
-    await wrapper.vm.helpers.refreshTanstackCache({ items: [] });
+    const wrapper = mount(EmptyArray, { global: { plugins: [VueQueryPlugin] } });
 
-    setTimeout(() => {
-        const cacheData = queryClient.getQueryData(["testCache"]);
-        expect(cacheData).toEqual(initialItems); // Cache should remain unchanged
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.testEmptyArray();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Item 1');
   });
 });

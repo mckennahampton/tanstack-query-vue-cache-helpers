@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
+import { useTanstackCacheHelpers } from '../../../composables/useTanstackCacheHelpers'
+import { useQuery } from '@tanstack/vue-query'
 
-const queryKey = "RemoveCustomKey";
-const helpers = useTanstackCacheHelpers<{ uuid: string, name: string}>([queryKey]);
+const queryKey = ["RemoveCustomKey"];
+const helpers = useTanstackCacheHelpers<{ uuid: string, name: string}>(queryKey);
 
-const query = queryFactory({
+const query = useQuery<{ uuid: string, name: string}[], Error, { uuid: string, name: string}[]>({
   queryKey,
   queryFn: () => Promise.resolve([
     { uuid: "abc", name: "Remove Me" },
@@ -13,7 +14,7 @@ const query = queryFactory({
 });
 
 const removeCustom = async () => {
-  await helpers.removeFromTanstackCache({ target: "abc", identityKey: "uuid" });
+  await helpers.removeItem({ target: "abc", identityKey: "uuid" });
 };
 
 defineExpose({ removeCustom, helpers });

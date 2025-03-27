@@ -3,12 +3,12 @@ export interface IAddToCache<T> {
     placement?: 'start' | 'back'
 }
 
-export interface IUpdateItemInCache<T> {
+export interface IUpdateItem<T> {
     item: T,
     identityKey?: keyof T
 }
 
-export interface IRemoveFromCache<T> {
+export interface IRemoveItem<T> {
     target: number | number[] | string | string[],
     identityKey?: keyof T,
 }

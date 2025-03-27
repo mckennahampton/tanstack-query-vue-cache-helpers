@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
+import { useTanstackCacheHelpers } from '../../../composables/useTanstackCacheHelpers'
 
 const queryKey = "RemoveFromUninitializedCache";
 const helpers = useTanstackCacheHelpers([queryKey]);
 
 const removeItem = async () => {
-    helpers.removeFromTanstackCache({ target: 1 });
+    helpers.removeItem({ target: 1 });
 }
 
 defineExpose({

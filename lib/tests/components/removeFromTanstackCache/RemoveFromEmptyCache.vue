@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
+import { useTanstackCacheHelpers } from '../../../composables/useTanstackCacheHelpers'
+import { useQuery } from '@tanstack/vue-query'
 
-const queryKey = "RemoveFromEmptyCache";
-const helpers = useTanstackCacheHelpers([queryKey]);
+interface Item { id: number, name: string }
 
-const query = queryFactory({
+const queryKey = ["RemoveFromEmptyCache"];
+const helpers = useTanstackCacheHelpers<Item>(queryKey);
+
+const query = useQuery<Item[], Error, Item[]>({
   queryKey,
   queryFn: () => Promise.resolve([]),
 });
 
 const removeFromEmpty = async () => {
-  await helpers.removeFromTanstackCache({ target: 1 });
+  await helpers.removeItem({ target: 1 });
 };
 
 defineExpose({ removeFromEmpty, helpers });

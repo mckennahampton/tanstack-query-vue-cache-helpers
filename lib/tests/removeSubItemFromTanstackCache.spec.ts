@@ -1,123 +1,47 @@
 import { mount } from "@vue/test-utils";
-import { defineComponent, h } from "vue";
-import { describe, it, expect, beforeEach } from "vitest";
-import { QueryClient, VueQueryPlugin } from "@tanstack/vue-query";
-import { useTanstackCacheHelpers } from "../composables/useTanstackQueryHelpers";
+import { describe, it, expect } from "vitest";
+import { VueQueryPlugin } from "@tanstack/vue-query";
+import RemoveFromArray from './components/removeSubItemFromTanstackCache/RemoveFromArray.vue';
+import RemoveNonExistentSubItem from './components/removeSubItemFromTanstackCache/RemoveNonExistentSubItem.vue';
+import RemoveSingleSubItem from './components/removeSubItemFromTanstackCache/RemoveSingleSubItem.vue';
+import RemoveFromNonExistentParent from './components/removeSubItemFromTanstackCache/RemoveFromNonExistentParent.vue';
 
-const queryClient = new QueryClient();
-
-// Utility to create a Vue component for testing
-const createTestComponent = (fn: () => any) =>
-  defineComponent({
-    setup: fn,
-    render: () => h("div"),
-  });
+const pollArgs = {
+  interval: 250,
+  timeout: 10000,
+};
 
 describe("removeSubItemFromTanstackCache", () => {
-  let wrapper: any;
-
-  beforeEach(() => {
-    queryClient.clear();
-    wrapper = mount(
-      createTestComponent(() => {
-        const helpers = useTanstackCacheHelpers("testCache");
-        return { helpers };
-      }),
-      {
-        global: {
-          plugins: [VueQueryPlugin],
-        },
-      }
-    );
-  });
-
   it("should remove a sub-item from an array inside the parent item", async () => {
-    const initialData = [
-      { id: 1, name: "Parent Item", subItems: [{ id: 101, name: "Sub Item 1" }, { id: 102, name: "Sub Item 2" }] },
-    ];
+    const wrapper = mount(RemoveFromArray, { global: { plugins: [VueQueryPlugin] } });
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-
-    await wrapper.vm.helpers.removeSubItemFromTanstackCache({
-      targetKeyValue: 1,
-      subItemsKey: "subItems",
-      removalKey: "id",
-      removalKeyValue: 101, // Remove sub-item with id 101
-    });
-
-    setTimeout(() => {
-        const cacheData = queryClient.getQueryData(["testCache"]);
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData[0].subItems).toEqual([{ id: 102, name: "Sub Item 2" }]);
-        }
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.removeItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Sub Item 2');
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Sub Item 1');
   });
 
   it("should handle cases where the sub-item does not exist", async () => {
-    const initialData = [
-      { id: 1, name: "Parent Item", subItems: [{ id: 101, name: "Sub Item 1" }] },
-    ];
+    const wrapper = mount(RemoveNonExistentSubItem, { global: { plugins: [VueQueryPlugin] } });
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-
-    await wrapper.vm.helpers.removeSubItemFromTanstackCache({
-      targetKeyValue: 1,
-      subItemsKey: "subItems",
-      removalKey: "id",
-      removalKeyValue: 999, // Non-existent sub-item
-    });
-
-    setTimeout(() => {
-        const cacheData = queryClient.getQueryData(["testCache"]);
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData[0].subItems).toEqual([{ id: 101, name: "Sub Item 1" }]); // Should remain unchanged
-        }
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.removeItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Sub Item 1');
   });
 
   it("should nullify a single sub-item instead of an array", async () => {
-    const initialData = [{ id: 1, name: "Parent Item", subItem: { id: 101, name: "Single Sub Item" } }];
+    const wrapper = mount(RemoveSingleSubItem, { global: { plugins: [VueQueryPlugin] } });
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-
-    await wrapper.vm.helpers.removeSubItemFromTanstackCache({
-      targetKeyValue: 1,
-      subItemsKey: "subItem", // This is a single object, not an array
-      removalKey: "id",
-      removalKeyValue: 101,
-    });
-
-    setTimeout(() => {
-        const cacheData = queryClient.getQueryData(["testCache"]);
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData[0].subItem).toBeNull(); // Should nullify the object
-        }
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.removeItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('null');
   });
 
   it("should do nothing if the parent item is not found", async () => {
-    const initialData = [
-      { id: 1, name: "Parent Item", subItems: [{ id: 101, name: "Sub Item 1" }] },
-    ];
+    const wrapper = mount(RemoveFromNonExistentParent, { global: { plugins: [VueQueryPlugin] } });
 
-    await wrapper.vm.helpers.refreshTanstackCache({ items: initialData });
-
-    await wrapper.vm.helpers.removeSubItemFromTanstackCache({
-      targetKeyValue: 999, // Non-existent parent item
-      subItemsKey: "subItems",
-      removalKey: "id",
-      removalKeyValue: 101,
-    });
-
-    setTimeout(() => {
-        const cacheData = queryClient.getQueryData(["testCache"]);
-        expect(cacheData).toBeInstanceOf(Array);
-        if (Array.isArray(cacheData)) {
-            expect(cacheData).toEqual(initialData); // Should remain unchanged
-        }
-    }, 1000);
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.removeItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Sub Item 1');
   });
 });

@@ -13,7 +13,7 @@ describe('clearTanstackCache', () => {
     const wrapper = mount(ClearCache, { global: { plugins: [VueQueryPlugin] } });
 
     await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
-    await wrapper.vm.helpers.clearTanstackCache();
+    await wrapper.vm.helpers.clearCache();
     await expect.poll(() => wrapper.text(), pollArgs).toContain('No Items');
   });
 });

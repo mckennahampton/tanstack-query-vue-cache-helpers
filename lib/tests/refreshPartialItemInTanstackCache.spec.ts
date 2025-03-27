@@ -9,18 +9,6 @@ import ReplaceArrayAsObject from './components/refreshPartialItemInTanstackCache
 const pollArgs = { interval: 250, timeout: 5000 }
 
 describe('refreshPartialItemInTanstackCache', () => {
-  it('updates sub-array within a target item', async () => {
-    const wrapper = mount(ReplaceSubArray, {
-      global: { plugins: [VueQueryPlugin] },
-    });
-
-    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
-    await expect.poll(() => wrapper.text(), pollArgs).toContain('Old Sub 1');
-    await wrapper.vm.update();
-    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Old Sub 2');
-    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Sub 2');
-    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Sub 3');
-  });
 
   it('replaces the entire sub-array when no identities match', async () => {
     const wrapper = mount(ReplaceSubArrayNoMatch, {
@@ -68,5 +56,22 @@ describe('refreshPartialItemInTanstackCache', () => {
     await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Old Sub 2');
     await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Sub 2');
     await expect.poll(() => wrapper.text(), pollArgs).toContain('New Sub 3');
+  });
+
+  it('should replace sub-array with array content', async () => {
+    const wrapper = mount(ReplaceSubArray, { global: { plugins: [VueQueryPlugin] } });
+
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.updateWithArray();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Sub 2');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Sub 3');
+  });
+
+  it('should replace sub-array with single item', async () => {
+    const wrapper = mount(ReplaceSubArray, { global: { plugins: [VueQueryPlugin] } });
+
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.updateWithSingleItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Single New Sub');
   });
 });

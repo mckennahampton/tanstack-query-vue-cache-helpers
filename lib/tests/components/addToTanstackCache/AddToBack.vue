@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { useTanstackCacheHelpers, queryFactory } from '../../../composables/useTanstackQueryHelpers'
+import { useTanstackCacheHelpers } from '../../../composables/useTanstackCacheHelpers'
+import { useQuery } from '@tanstack/vue-query'
 
-const queryKey = 'AddToBack';
-const helpers = useTanstackCacheHelpers([queryKey]);
+const queryKey = ['AddToBack'];
+const helpers = useTanstackCacheHelpers(queryKey);
 
-const query = queryFactory({
+const query = useQuery({
   queryKey,
   queryFn: () => Promise.resolve([{ id: 1, name: 'First' }]),
 });
 
 const addItemToBack = async () => {
-  await helpers.addToTanstackCache({ item: { id: 2, name: 'Last' }, placement: 'back' });
+  await helpers.addToCache({ item: { id: 2, name: 'Last' }, placement: 'back' });
 };
 
 defineExpose({ query, addItemToBack, helpers });
