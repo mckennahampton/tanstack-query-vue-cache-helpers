@@ -34,7 +34,6 @@ export const refreshArray = <T>({
     truncate = false,
     identityKey = 'id' as keyof T,
     newItemsLocation = 'back',
-    debug = false
 }: RefreshArrayArgs<T>): MaybeRef<T[]> =>
 {
 
@@ -72,15 +71,8 @@ export const refreshArray = <T>({
         unref(newItems).forEach(newItem => {
 
             // Update anything that already exists
-            if (debug) console.log({
-                1: unref(array).some(item => item[identityKey] == newItem[identityKey]),
-                2: newItem,
-                3: identityKey,
-            })
             if (unref(array).some(item => item[identityKey] == newItem[identityKey]))
             {
-                if (debug) console.log(unref(array), newItem)
-                if (debug) console.log(unref(array).findIndex(item => item[identityKey] == newItem[identityKey]))
                 unref(array).splice(unref(array).findIndex(item => item[identityKey] == newItem[identityKey]), 1, newItem)
             }
 
@@ -100,5 +92,6 @@ export const refreshArray = <T>({
         })
     }
 
+    console.log('array', unref(array))
     return array
 }

@@ -58,26 +58,24 @@ export const removeDeepItem = <T>({
     else if (oldItem[parentKey])
     {
 
-        // Determine if the item is root-level or nested in a parent
-        let isRoot = unref(array).some(item => item[identityKey] == oldItem)
-        if (isRoot)
-        {
-            // No need to search recursively, just remove the item
-            removeArrayItem({ array: unref(array), identityValues: [oldItem[identityKey]] as number[] | string[], identityKey: identityKey })
-        }
+        const parent = findRecursiveParent({
+            array: unref(array),
+            identityKey: identityKey,
+            target: oldItem[identityKey],
+            childKey: childKey
+        })
 
-        else if (findRecursive({array: unref(array), identityKey: identityKey, target: oldItem[identityKey], childKey: childKey}))
-        {
-            (findRecursive({array: unref(array), identityKey: identityKey, target: oldItem[identityKey], childKey: childKey})?.[childKey] as T[]).splice(
-                (findRecursive({array: unref(array), identityKey: identityKey, target: oldItem[identityKey], childKey: childKey})?.[childKey] as T[]).findIndex(item => item[identityKey] == oldItem[identityKey]),
-                1
-            )
+        if (parent) {
+            const children = parent[childKey] as T[]
+            const index = children.findIndex(item => item[identityKey] == oldItem[identityKey])
+            if (index !== -1) {
+                children.splice(index, 1)
+            }
         }
-
         else
         {
             console.error("Could not find parent item to remove nested item", {
-                result: findRecursive({array: unref(array), identityKey: identityKey, target: oldItem[identityKey], childKey: childKey}),
+                result: parent,
                 oldItem: oldItem,
                 parentKey: parentKey,
                 childKey: childKey,
