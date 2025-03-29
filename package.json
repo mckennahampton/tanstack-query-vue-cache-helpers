@@ -22,7 +22,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@inertiajs/vue3": "^2.0.5",
@@ -39,6 +42,7 @@
     "jsdom": "^26.0.0",
     "typescript": "~5.7.2",
     "vite": "^6.2.0",
+    "vitepress": "^1.6.3",
     "vitest": "^3.0.9",
     "vue-tsc": "^2.2.4"
   }
