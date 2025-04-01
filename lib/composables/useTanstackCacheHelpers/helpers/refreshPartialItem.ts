@@ -14,7 +14,6 @@ export const refreshPartialItem = async <T extends object, U>(
         updatedContent,
         updatedItemsIdentityKey = 'id' as keyof U,
         treatArrayAsObject = false,
-        debug = false
     }: IRefreshPartialItem<T, U>
 ) => {
     if (isQueryInitialized(queryClient, queryKey)) {

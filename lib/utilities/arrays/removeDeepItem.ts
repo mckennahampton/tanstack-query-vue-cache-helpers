@@ -1,8 +1,13 @@
 import { type MaybeRef, unref } from 'vue'
-import { findRecursive } from './findRecursive'
 import { removeArrayItem } from './removeArrayItem'
 import { findRecursiveParent } from './findRecursiveParent'
 
+const findArrayIndex = <T>(arr: T[], predicate: (item: T) => boolean): number => {
+    for (let i = 0; i < arr.length; i++) {
+        if (predicate(arr[i])) return i
+    }
+    return -1
+}
 
 export interface RemoveDeepItemArgs<T> {
     array: MaybeRef<T[]>,
@@ -38,7 +43,9 @@ export const removeDeepItem = <T>({
             if (parent)
             {
                 // Remove the child with matching ID from the parent
-                (parent[childKey] as T[]).splice((parent[childKey] as T[]).findIndex(item => item[identityKey] == oldItem), 1)
+                const children = parent[childKey] as T[]
+                const index = findArrayIndex(children, item => item[identityKey] == oldItem)
+                if (index !== -1) children.splice(index, 1)
                 return
             }
             else
@@ -57,7 +64,6 @@ export const removeDeepItem = <T>({
     // Check if the item provided is an object with it's parent key
     else if (oldItem[parentKey])
     {
-
         const parent = findRecursiveParent({
             array: unref(array),
             identityKey: identityKey,
@@ -67,7 +73,7 @@ export const removeDeepItem = <T>({
 
         if (parent) {
             const children = parent[childKey] as T[]
-            const index = children.findIndex(item => item[identityKey] == oldItem[identityKey])
+            const index = findArrayIndex(children, item => item[identityKey] == oldItem[identityKey])
             if (index !== -1) {
                 children.splice(index, 1)
             }

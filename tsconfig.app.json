@@ -1,17 +1,34 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-
-    /* Linting */
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "declaration": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "composite": true,
-    "emitDeclarationOnly": true, // use this field instead of "noEmit"
-    "noEmit": false,
+    "types": ["vite/client", "vitest/globals"],
+    "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["lib/*"]
+    }
   },
-  "include": ["lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.vue", "lib/composables/useTanstackQueryHelpers.test.ts_old", "lib/tests/refreshPartialItemInTanstackCache.spec.ts_old", "lib/tests/addToTanstackCache.spec.ts_old", "lib/tests/isQueryInitialized.spec.ts_old", "lib/tests/mutationFactory.spec.ts_old", "lib/tests/refreshDeepItemInTanstackCache.spec.ts_old"]
+  "include": ["lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.vue", "lib/composables/useTanstackQueryHelpers.test.ts_old", "lib/tests/refreshPartialItemInTanstackCache.spec.ts_old", "lib/tests/addToTanstackCache.spec.ts_old", "lib/tests/isQueryInitialized.spec.ts_old", "lib/tests/mutationFactory.spec.ts_old", "lib/tests/refreshDeepItemInTanstackCache.spec.ts_old"],
+  "exclude": ["node_modules", "dist", "**/*.d.ts"]
 }

@@ -10,8 +10,6 @@ interface Item {
   parent_id?: number | null
 }
 
-type ItemKey = keyof Item
-
 describe('removeDeepItem', () => {
   it('should remove root-level item when provided as number', () => {
     const array: Item[] = [
