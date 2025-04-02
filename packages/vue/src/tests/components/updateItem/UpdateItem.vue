@@ -2,9 +2,13 @@
 import { useTanstackCacheHelpers } from '../../../composables/useTanstackCacheHelpers'
 import { useQuery } from '@tanstack/vue-query'
 
+interface Item {
+  id: number;
+  name: string;
+}
 
 const queryKey = ['UpdateItem'];
-const helpers = useTanstackCacheHelpers(queryKey);
+const helpers = useTanstackCacheHelpers<Item>(queryKey);
 
 const query = useQuery({
   queryKey,
@@ -12,7 +16,10 @@ const query = useQuery({
 });
 
 const updateItem = async () => {
-  await helpers.updateItem({ item: { id: 1, name: 'Updated Item' } })
+  await helpers.updateItem({
+    item: { id: 1, name: 'Updated Item' },
+    identityKey: 'id'
+  })
 };
 
 defineExpose({ query, updateItem, helpers });

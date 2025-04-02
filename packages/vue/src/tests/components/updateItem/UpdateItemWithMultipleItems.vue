@@ -22,7 +22,8 @@ const query = useQuery<Item[], Error, Item[]>({
 
 const updateItem = async () => {
   await helpers.updateItem({
-    item: { id: 2, name: 'Updated Item 2' }
+    item: { id: 2, name: 'Updated Item 2' },
+    identityKey: 'id'
   });
 };
 

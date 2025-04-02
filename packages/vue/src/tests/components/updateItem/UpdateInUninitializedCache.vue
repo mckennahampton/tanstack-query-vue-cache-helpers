@@ -18,7 +18,12 @@ const query = useQuery({
 });
 
 const updateItem = async () => {
-  await helpers.updateItem({ item: { id: 1, name: "Updated Item" } });
+  await helpers.updateItem(
+    { 
+      item: { id: 1, name: "Updated Item" },
+      identityKey: 'id'
+    }
+  );
 };
 
 defineExpose({ updateItem, query, helpers });
