@@ -1,0 +1,39 @@
+{
+  "name": "@tanstack-query-cache-helpers/core",
+  "version": "0.1.0",
+  "description": "Core framework-agnostic functionality for TanStack Query cache helpers",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts",
+    "dev": "tsup src/index.ts --watch",
+    "lint": "eslint src",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "peerDependencies": {
+    "@tanstack/query-core": "^5.0.0"
+  },
+  "devDependencies": {
+    "@tanstack/query-core": "^5.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "rimraf": "^5.0.0",
+    "vitest": "^3.0.0"
+  }
+} 
