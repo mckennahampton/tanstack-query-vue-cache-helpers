@@ -3,6 +3,8 @@ import { useQueryClient } from "@tanstack/vue-query"
 import { addToCache } from "./helpers/addToCache"
 import { updateItem } from "./helpers/updateItem"
 import { refreshCache } from "./helpers/refreshCache"
+import { refreshDeepItem } from "./helpers/refreshDeepItem"
+import { refreshPartialItem } from "./helpers/refreshPartialItem"
 import { isQueryInitialized } from "@tanstack-query-cache-helpers/core"
 import { clearCache } from "./helpers/clearCache"
 import type {
@@ -10,21 +12,23 @@ import type {
     IUpdateItem,
     IRefreshCache,
     // IRemoveItem,
-    // IRefreshDeepItem,
+    IRefreshDeepItem,
     // IRemoveDeepItem,
     // IRemoveSubItem,
-    // IRefreshPartialItem
+    IRefreshPartialItem
 } from "@tanstack-query-cache-helpers/core"
 
-export const useTanstackCacheHelpers = <T extends object, TTaggedQueryKey extends QueryKey = QueryKey>(queryKey: TTaggedQueryKey) => {
+export const useTanstackCacheHelpers = <T extends object, U extends object = any, TTaggedQueryKey extends QueryKey = QueryKey>(queryKey: TTaggedQueryKey) => {
     const queryClient = useQueryClient()
 
     return {
         queryClient,
         isQueryInitialized: () => isQueryInitialized(queryClient, queryKey),
-        addToCache: (options: IAddToCache<T>) => addToCache(queryClient, queryKey, options),
-        updateItem: (options: IUpdateItem<T>) => updateItem(queryClient, queryKey, options),
+        addToCache: (options: IAddToCache<T>) => addToCache<T>(queryClient, queryKey, options),
+        updateItem: (options: IUpdateItem<T>) => updateItem<T>(queryClient, queryKey, options),
         clearCache: () => clearCache(queryClient, queryKey),
-        refreshCache: (options: IRefreshCache<T>) => refreshCache(queryClient, queryKey, options),
+        refreshCache: (options: IRefreshCache<T>) => refreshCache<T>(queryClient, queryKey, options),
+        refreshDeepItem: (options: IRefreshDeepItem<T>) => refreshDeepItem<T>(queryClient, queryKey, options),
+        refreshPartialItem: (options: IRefreshPartialItem<T, U>) => refreshPartialItem<T, U>(queryClient, queryKey, options),
     }
 }
