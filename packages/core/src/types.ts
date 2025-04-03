@@ -10,4 +10,10 @@ export interface IUpdateItem<T> {
 
 export interface IFrameworkAdapter {
     nextTick: () => Promise<void>
+}
+
+export interface IRefreshCache<T> {
+    items: T[],
+    identityKey?: keyof T,
+    newItemsLocation?: 'front' | 'back'
 } 
