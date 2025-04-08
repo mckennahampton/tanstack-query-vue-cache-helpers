@@ -5,6 +5,7 @@ import { updateItem } from "./helpers/updateItem"
 import { refreshCache } from "./helpers/refreshCache"
 import { refreshDeepItem } from "./helpers/refreshDeepItem"
 import { removeDeepItem } from "./helpers/removeDeepItem"
+import { removeItem } from "./helpers/removeItem"
 import { refreshPartialItem } from "./helpers/refreshPartialItem"
 import { isQueryInitialized } from "@tanstack-query-cache-helpers/core"
 import { clearCache } from "./helpers/clearCache"
@@ -12,7 +13,7 @@ import type {
     IAddToCache,
     IUpdateItem,
     IRefreshCache,
-    // IRemoveItem,
+    IRemoveItem,
     IRefreshDeepItem,
     IRemoveDeepItem,
     // IRemoveSubItem,
@@ -32,5 +33,6 @@ export const useTanstackCacheHelpers = <T extends object, U extends object = any
         refreshDeepItem: (options: IRefreshDeepItem<T>) => refreshDeepItem<T>(queryClient, queryKey, options),
         refreshPartialItem: (options: IRefreshPartialItem<T, U>) => refreshPartialItem<T, U>(queryClient, queryKey, options),
         removeDeepItem: (options: IRemoveDeepItem<T>) => removeDeepItem<T>(queryClient, queryKey, options),
+        removeItem: (options: IRemoveItem<T>) => removeItem<T>(queryClient, queryKey, options),
     }
 }

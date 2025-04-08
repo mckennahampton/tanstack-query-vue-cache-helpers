@@ -32,6 +32,11 @@ export interface IRemoveDeepItem<T> {
     identityKey?: keyof T
 }
 
+export interface IRemoveItem<T> {
+    target: number | number[] | string | string[],
+    identityKey?: keyof T,
+}
+
 export interface IRemoveSubItem<T, U> {
     targetKeyValue: string | number,
     identityKey?: keyof T,
