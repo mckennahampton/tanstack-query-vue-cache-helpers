@@ -1,7 +1,7 @@
 // vitest.setup.ts
-import { config } from '@vue/test-utils'
-import { vi } from 'vitest'
-import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query'
+// import { config } from '@vue/test-utils'
+// import { vi } from 'vitest'
+import { VueQueryPlugin, QueryClient } from './packages/vue/node_modules/@tanstack/vue-query'
 
 // Create a global QueryClient for tests
 global.queryClient = new QueryClient({
