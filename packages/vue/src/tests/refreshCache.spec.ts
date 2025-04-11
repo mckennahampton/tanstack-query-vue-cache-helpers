@@ -1,11 +1,12 @@
 import { mount } from "@vue/test-utils";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import UpdateExistingItems from './components/refreshCache/UpdateExistingItems.vue';
 import AddNewItems from './components/refreshCache/AddNewItems.vue';
 import AddToFront from './components/refreshCache/AddToFront.vue';
 import AddToBack from './components/refreshCache/AddToBack.vue';
 import EmptyArray from './components/refreshCache/EmptyArray.vue';
+import RefreshUninitializedCache from "./components/refreshCache/RefreshUninitializedCache.vue";
 
 const pollArgs = {
   interval: 250,
@@ -55,4 +56,32 @@ describe("refreshTanstackCache", () => {
     await wrapper.vm.testEmptyArray();
     await expect.poll(() => wrapper.text(), pollArgs).toContain('Item 1');
   });
+
+  it('should call handleNotInitialized when trying to refresh an uninitialized cache', async () => {
+    // Spy on console.debug to catch the handleNotInitialized call
+    const consoleSpy = vi.spyOn(console, 'debug')
+
+    const wrapper = mount(RefreshUninitializedCache, {
+      global: { plugins: [VueQueryPlugin] },
+    })
+
+    // Verify query is not initialized
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(false)
+
+    // Attempt to refresh the cache
+    await wrapper.vm.refreshCache()
+
+    // Verify handleNotInitialized was called with the correct arguments
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Query with key ["RefreshUninitializedCache"] is not initialized'),
+      expect.objectContaining({
+        call: 'refreshCache',
+        queryKey: ['RefreshUninitializedCache'],
+        items: [{ id: 1, name: 'New Item' }]
+      })
+    )
+
+    // Verify the query is still not initialized
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(false)
+  })
 });

@@ -17,7 +17,18 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      reportsDirectory: './coverage'
+      reportsDirectory: './coverage',
+      exclude: [
+        'tsup.config.ts',
+        'vitest.config.ts',
+        'dist/**/*',
+        'src/**/*.{test,spec}.{js,ts,jsx,tsx}',
+        'src/tests/**/*',
+        'src/**/*.d.ts',
+        'src/**/*.config.{js,ts}',
+        'src/**/index.{js,ts}',
+        'src/**/types.{js,ts}'
+      ]
     }
   },
   resolve: {

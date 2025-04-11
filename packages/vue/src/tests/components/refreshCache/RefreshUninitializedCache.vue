@@ -24,5 +24,5 @@ const refreshCache = async () => {
 defineExpose({ refreshCache, query, helpers });
 </script>
 <template>
-  <div>{{ query.data }}</div>
+  <div :key="JSON.stringify(query.data)">{{ query.data }}</div>
 </template> 
