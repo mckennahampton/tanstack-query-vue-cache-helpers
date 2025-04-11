@@ -13,6 +13,11 @@ export default defineConfig({
     hookTimeout: 10000,
     deps: {
       inline: [/@vue/, /@tanstack/]
+    },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      reportsDirectory: './coverage'
     }
   },
   resolve: {
