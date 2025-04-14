@@ -20,6 +20,7 @@ export interface IRefreshDeepItem<T> {
     childKey: keyof T;
     parentKey: keyof T;
     identityKey?: keyof T;
+    findFn?: (cacheItem: T, newItem: T) => boolean;
 }
 export interface IRemoveDeepItem<T> {
     targetKeyValue: T | number;

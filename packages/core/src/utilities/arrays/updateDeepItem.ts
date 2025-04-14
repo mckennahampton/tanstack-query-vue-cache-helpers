@@ -7,7 +7,8 @@ interface UpdateDeepItemArgs<T> {
     item: T,
     childKey: keyof T,
     parentKey: keyof T,
-    identityKey?: keyof T
+    identityKey?: keyof T,
+    findFn?: (item: T, target: any) => boolean
 }
 
 export const updateDeepItem = <T>({
@@ -15,10 +16,18 @@ export const updateDeepItem = <T>({
     item,
     childKey,
     parentKey,
-    identityKey = 'id' as keyof T
+    identityKey = 'id' as keyof T,
+    findFn
 }: UpdateDeepItemArgs<T>) => {
 
-    let target = findRecursive({ array: array, identityKey, target: item[identityKey], childKey: childKey})
+    let target = findRecursive({ 
+        array: array, 
+        identityKey, 
+        target: item[identityKey], 
+        childKey: childKey,
+        findFn: findFn ? (existingItem, targetValue) => findFn(existingItem, item) : undefined
+    })
+    
     if (target)
     {
         // The item has potentially moved, so we need to handle that use-case
@@ -31,7 +40,8 @@ export const updateDeepItem = <T>({
                 oldItem: target,
                 childKey: childKey,
                 parentKey: parentKey,
-                identityKey: identityKey
+                identityKey: identityKey,
+                findFn
             })
 
             // and add the new object to it's new parent
@@ -40,7 +50,8 @@ export const updateDeepItem = <T>({
                 item: item,
                 childKey: childKey,
                 parentKey: parentKey,
-                identityKey: identityKey
+                identityKey: identityKey,
+                findFn
             })
         }
 

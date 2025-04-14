@@ -5,6 +5,7 @@ import { VueQueryPlugin } from '@tanstack/vue-query'
 import UpdateNestedItem from './components/refreshDeepItem/UpdateNestedItem.vue'
 import InsertNestedItem from './components/refreshDeepItem/InsertNestedItem.vue'
 import AddRootLevelItem from './components/refreshDeepItem/AddRootLevelItem.vue'
+import UpdateNestedItemWithFindFn from './components/refreshDeepItem/UpdateNestedItemWithFindFn.vue'
 
 const pollArgs = { interval: 100, timeout: 5000 }
 
@@ -37,5 +38,13 @@ describe('refreshDeepItemInTanstackCache', () => {
 
     await wrapper.vm.addRoot()
     await expect.poll(() => wrapper.text(), pollArgs).toContain('New Root')
+  })
+
+  it('updates a nested item with a custom findFn', async () => {
+    const wrapper = mount(UpdateNestedItemWithFindFn, { global: { plugins: [VueQueryPlugin] } })
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    
+    await wrapper.vm.updateChild()
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Child')
   })
 })

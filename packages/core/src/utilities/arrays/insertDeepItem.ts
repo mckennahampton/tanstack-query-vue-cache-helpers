@@ -5,7 +5,8 @@ interface InsertDeepItemArgs<T> {
     item: T,
     childKey: keyof T,
     parentKey: keyof T,
-    identityKey?: keyof T
+    identityKey?: keyof T,
+    findFn?: (item: T, target: any) => boolean
 }
 
 export const insertDeepItem = <T>({
@@ -13,20 +14,29 @@ export const insertDeepItem = <T>({
     item,
     childKey,
     parentKey,
-    identityKey = 'id' as keyof T
+    identityKey = 'id' as keyof T,
+    findFn
 }: InsertDeepItemArgs<T>) => {
 
     // Parent value is not null
     if (item[parentKey])
     {
-        if (findRecursive({ array: array, identityKey, target: item[parentKey], childKey: childKey}))
+        const parentItem = findRecursive({ 
+            array: array, 
+            identityKey, 
+            target: item[parentKey], 
+            childKey: childKey,
+            findFn: undefined  // Use standard key-based lookup for parent
+        });
+        
+        if (parentItem)
         {
-            (findRecursive({ array: array, identityKey, target: item[parentKey], childKey: childKey})?.[childKey] as T[]).push(item)
+            (parentItem[childKey] as T[]).push(item);
         }
         else
         {
             console.error("Could not find parent item to house new item", {
-                result: findRecursive({ array: array, identityKey, target: item[parentKey], childKey: childKey}),
+                result: parentItem,
                 newItem: item,
                 parentKey: parentKey,
                 childKey: childKey,

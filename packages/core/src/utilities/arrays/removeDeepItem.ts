@@ -13,7 +13,8 @@ export interface RemoveDeepItemArgs<T> {
     oldItem: T | number,
     childKey: keyof T,
     parentKey: keyof T,
-    identityKey?: keyof T
+    identityKey?: keyof T,
+    findFn?: (item: T, target: any) => boolean
 }
 
 export const removeDeepItem = <T>({
@@ -21,7 +22,8 @@ export const removeDeepItem = <T>({
     oldItem,
     childKey,
     parentKey,
-    identityKey = 'id' as keyof T
+    identityKey = 'id' as keyof T,
+    findFn
 }: RemoveDeepItemArgs<T>) => {
 
     // If the item provided is a number
@@ -32,18 +34,31 @@ export const removeDeepItem = <T>({
         if (isRoot)
         {
             // No need to search recursively, just remove the item
-            removeArrayItem({ array: array, identityValues: [oldItem], identityKey: identityKey })
+            removeArrayItem({ 
+                array: array, 
+                identityValues: [oldItem], 
+                identityKey: identityKey, 
+                findFn: findFn ? (item) => findFn(item, oldItem) : undefined 
+            })
         }
 
         // The target is nested somewhere
         else
         {
-            let parent = findRecursiveParent({array: array, identityKey: identityKey, target: oldItem, childKey: childKey})
+            let parent = findRecursiveParent({
+                array: array, 
+                identityKey: identityKey, 
+                target: oldItem, 
+                childKey: childKey,
+                findFn: undefined  // Use standard key-based lookup for parent
+            })
             if (parent)
             {
                 // Remove the child with matching ID from the parent
                 const children = parent[childKey] as T[]
-                const index = findArrayIndex(children, item => item[identityKey] == oldItem)
+                const index = findFn 
+                    ? findArrayIndex(children, item => findFn(item, oldItem))
+                    : findArrayIndex(children, item => item[identityKey] == oldItem)
                 if (index !== -1) children.splice(index, 1)
                 return
             }
@@ -67,12 +82,15 @@ export const removeDeepItem = <T>({
             array: array,
             identityKey: identityKey,
             target: oldItem[identityKey],
-            childKey: childKey
+            childKey: childKey,
+            findFn: undefined  // Use standard key-based lookup for parent
         })
 
         if (parent) {
             const children = parent[childKey] as T[]
-            const index = findArrayIndex(children, item => item[identityKey] == oldItem[identityKey])
+            const index = findFn 
+                ? findArrayIndex(children, item => findFn(item, oldItem))
+                : findArrayIndex(children, item => item[identityKey] == oldItem[identityKey])
             if (index !== -1) {
                 children.splice(index, 1)
             }
@@ -92,6 +110,11 @@ export const removeDeepItem = <T>({
     // Item is root-level
     else
     {
-        removeArrayItem({ array: array, identityValues: [oldItem[identityKey]] as number[] | string[], identityKey: identityKey })
+        removeArrayItem({ 
+            array: array, 
+            identityValues: [oldItem[identityKey]] as number[] | string[], 
+            identityKey: identityKey,
+            findFn: findFn ? (item) => findFn(item, oldItem) : undefined
+        })
     }
 }

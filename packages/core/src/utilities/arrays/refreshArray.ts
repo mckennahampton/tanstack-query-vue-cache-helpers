@@ -25,6 +25,7 @@ interface RefreshArrayArgs<T> {
     identityKey?: keyof T
     newItemsLocation?: 'front' | 'back'
     debug?: boolean
+    findFn?: (item: T, target: T) => boolean
 }
 
 export const refreshArray = <T>({
@@ -34,6 +35,7 @@ export const refreshArray = <T>({
     identityKey = 'id' as keyof T,
     newItemsLocation = 'back',
     debug = false,
+    findFn
 }: RefreshArrayArgs<T>): T[] => {
     // Completely replace
     if (truncate || array?.length === 0) {
@@ -49,8 +51,16 @@ export const refreshArray = <T>({
     } else {
         newItems.forEach(newItem => {
             // Update anything that already exists
-            if (array.some(item => item[identityKey] === newItem[identityKey])) {
-                array.splice(array.findIndex(item => item[identityKey] === newItem[identityKey]), 1, newItem);
+            const exists = findFn 
+                ? array.some(item => findFn(item, newItem))
+                : array.some(item => item[identityKey] === newItem[identityKey]);
+                
+            if (exists) {
+                const index = findFn 
+                    ? array.findIndex(item => findFn(item, newItem))
+                    : array.findIndex(item => item[identityKey] === newItem[identityKey]);
+                    
+                array.splice(index, 1, newItem);
             }
             // Add anything new
             else {

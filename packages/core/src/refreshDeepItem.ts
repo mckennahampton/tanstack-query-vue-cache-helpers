@@ -10,7 +10,8 @@ export const refreshDeepItem = async <T extends object>(
         item,
         childKey,
         parentKey,
-        identityKey = 'id' as keyof T
+        identityKey = 'id' as keyof T,
+        findFn
     }: IRefreshDeepItem<T>,
     frameworkAdapter: IFrameworkAdapter
 ) => {
@@ -28,7 +29,8 @@ export const refreshDeepItem = async <T extends object>(
                         array: arrayCopy,
                         identityKey: identityKey,
                         target: item[identityKey],
-                        childKey: childKey
+                        childKey: childKey,
+                        findFn: findFn ? (existingItem, targetValue) => findFn(existingItem, item) : undefined
                     });
 
                     if (targetItem) {
@@ -37,7 +39,8 @@ export const refreshDeepItem = async <T extends object>(
                             item: item,
                             childKey: childKey,
                             parentKey: parentKey,
-                            identityKey: identityKey
+                            identityKey: identityKey,
+                            findFn
                         });
                     }
                     else {
@@ -46,7 +49,8 @@ export const refreshDeepItem = async <T extends object>(
                             item: item,
                             childKey: childKey,
                             parentKey: parentKey,
-                            identityKey: identityKey
+                            identityKey: identityKey,
+                            findFn
                         });
                     }
                 }
@@ -54,7 +58,8 @@ export const refreshDeepItem = async <T extends object>(
                 else {
                     refreshArray({ 
                         array: arrayCopy, 
-                        newItems: [item] 
+                        newItems: [item],
+                        findFn 
                     });
                 }
 
