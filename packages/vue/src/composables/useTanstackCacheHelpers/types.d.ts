@@ -43,4 +43,6 @@ export interface IRefreshPartialItem<T, U> {
     updatedItemsIdentityKey?: keyof U;
     treatArrayAsObject?: boolean;
     debug?: boolean;
+    findFn?: (cacheItem: T, targetValue: any) => boolean;
+    subItemFindFn?: (subItem: U, newItem: U) => boolean;
 }

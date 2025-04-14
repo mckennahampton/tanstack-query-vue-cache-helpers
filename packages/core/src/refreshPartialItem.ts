@@ -13,7 +13,9 @@ export const refreshPartialItem = async <T extends object, U>(
         updatedContent,
         updatedItemsIdentityKey = 'id' as keyof U,
         treatArrayAsObject = false,
-        debug = false
+        debug = false,
+        findFn,
+        subItemFindFn
     }: IRefreshPartialItem<T, U>,
     frameworkAdapter: IFrameworkAdapter
 ) => {
@@ -26,9 +28,13 @@ export const refreshPartialItem = async <T extends object, U>(
                 // Create a shallow copy of the cache array
                 let temp = [...cacheArray];
                 const newCacheArray = temp.map(item => ({ ...item }));
-                const target = newCacheArray.find(
-                    item => JSON.stringify(item[identityKey]) === JSON.stringify(targetKeyValue)
-                );
+                
+                // Find the target item using findFn if provided, otherwise use identity comparison
+                const target = findFn 
+                    ? newCacheArray.find(item => findFn(item, targetKeyValue))
+                    : newCacheArray.find(
+                        item => JSON.stringify(item[identityKey]) === JSON.stringify(targetKeyValue)
+                    );
         
                 if (target) {
                     if (Array.isArray(target[updateKey]) && !treatArrayAsObject) {
@@ -41,7 +47,8 @@ export const refreshPartialItem = async <T extends object, U>(
                             newItems: Array.isArray(updatedContent) ? updatedContent : [updatedContent],
                             newItemsLocation: 'back',
                             identityKey: updatedItemsIdentityKey,
-                            debug
+                            debug,
+                            findFn: subItemFindFn
                         });
         
                         // Assign the new array back to the target

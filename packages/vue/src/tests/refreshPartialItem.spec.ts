@@ -5,6 +5,7 @@ import ReplaceSubArray from './components/refreshPartialItem/ReplaceSubArray.vue
 import ReplaceSubArrayNoMatch from './components/refreshPartialItem/ReplaceSubArrayNoMatch.vue'
 import ReplaceSingleObject from './components/refreshPartialItem/ReplaceSingleObject.vue'
 import ReplaceArrayAsObject from './components/refreshPartialItem/ReplaceArrayAsObject.vue'
+import UpdateWithCustomFindFn from './components/refreshPartialItem/UpdateWithCustomFindFn.vue'
 
 const pollArgs = { interval: 250, timeout: 5000 }
 
@@ -74,4 +75,63 @@ describe('refreshPartialItemInTanstackCache', () => {
     await wrapper.vm.updateWithSingleItem();
     await expect.poll(() => wrapper.text(), pollArgs).toContain('Single New Sub');
   });
+  it('should add new sub item to array with custom findFn', async () => {
+    const wrapper = mount(UpdateWithCustomFindFn, { global: { plugins: [VueQueryPlugin] } });
+
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    
+    // Verify initial state
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Tag 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Tag 2');
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('New Tag');
+    
+    // Add a new tag using custom findFn
+    await wrapper.vm.addNewTag();
+    
+    // Verify new tag was added while preserving existing ones
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Tag 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Tag 2');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Tag');
+    
+  });
+  it('should update sub item with both findFn and subItemFindFn', async () => {
+    const wrapper = mount(UpdateWithCustomFindFn, { global: { plugins: [VueQueryPlugin] } });
+
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    
+    // Verify initial state
+    console.log(wrapper.text())
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Tag 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Tag 2');
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Updated Tag 2');
+    
+    // Update tag using both findFn and subItemFindFn
+    await wrapper.vm.updateTag();
+    console.log(wrapper.text())
+    
+    // Verify specific tag was updated
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Tag 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Tag 2');
+    
+  });
+  it('should update item field using findFn to locate the parent item', async () => {
+    const wrapper = mount(UpdateWithCustomFindFn, { global: { plugins: [VueQueryPlugin] } });
+
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    
+    // Verify initial state
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Test Item');
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Updated Item Name');
+    
+    // Update name using findFn
+    await wrapper.vm.updateItemName();
+    
+    // Verify name was updated but tags remain
+    await expect.poll(() => wrapper.text(), pollArgs).not.toContain('Test Item');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Updated Item Name');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Tag 1');
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('Tag 2');
+    
+  });
+
 });
