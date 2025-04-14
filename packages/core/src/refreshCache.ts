@@ -8,7 +8,8 @@ export const refreshCache = async <T extends object>(
     {
         items,
         identityKey = 'id' as keyof T,
-        newItemsLocation = 'front'
+        newItemsLocation = 'front',
+        findFn
     }: IRefreshCache<T>,
     frameworkAdapter: IFrameworkAdapter
 ) => {
@@ -21,7 +22,10 @@ export const refreshCache = async <T extends object>(
                 let temp = [...cacheArray!]
                 items.forEach(newItem => {
                     // Update anything that already exists
-                    let index = temp.findIndex(item => newItem[identityKey] == item[identityKey])
+                    let index = findFn 
+                        ? temp.findIndex(item => findFn(item, newItem))
+                        : temp.findIndex(item => newItem[identityKey] == item[identityKey])
+                    
                     if (index != -1) {
                         temp.splice(index, 1, newItem)
                     }

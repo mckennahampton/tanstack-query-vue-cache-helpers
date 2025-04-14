@@ -20,12 +20,12 @@
     },
     "files": [],
     "include": [
-        "lib/**/*.ts",
-        "lib/**/*.d.ts",
-        "lib/**/*.tsx",
-        "lib/**/*.vue",
+        "lib_delete/**/*.ts",
+        "lib_delete/**/*.d.ts",
+        "lib_delete/**/*.tsx",
+        "lib_delete/**/*.vue",
         "node_modules/@types/**/*.ts"
-, "lib/composables/useTanstackQueryHelpers.test.ts_old", "lib/tests/refreshPartialItemInTanstackCache.spec.ts_old", "lib/tests/addToTanstackCache.spec.ts_old", "lib/tests/isQueryInitialized.spec.ts_old", "lib/tests/mutationFactory.spec.ts_old", "lib/tests/refreshDeepItemInTanstackCache.spec.ts_old"    ],
+, "lib_delete/composables/useTanstackQueryHelpers.test.ts_old", "lib_delete/tests/refreshPartialItemInTanstackCache.spec.ts_old", "lib_delete/tests/addToTanstackCache.spec.ts_old", "lib_delete/tests/isQueryInitialized.spec.ts_old", "lib_delete/tests/mutationFactory.spec.ts_old", "lib_delete/tests/refreshDeepItemInTanstackCache.spec.ts_old"    ],
     "references": [
         { "path": "./tsconfig.app.json" },
         { "path": "./tsconfig.node.json" }

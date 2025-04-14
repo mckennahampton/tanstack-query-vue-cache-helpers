@@ -15,7 +15,8 @@ export interface IFrameworkAdapter {
 export interface IRefreshCache<T> {
     items: T[],
     identityKey?: keyof T,
-    newItemsLocation?: 'front' | 'back'
+    newItemsLocation?: 'front' | 'back',
+    findFn?: (cacheItem: T, newItem: T) => boolean
 }
 
 export interface IRefreshDeepItem<T> {

@@ -7,6 +7,7 @@ import AddToFront from './components/refreshCache/AddToFront.vue';
 import AddToBack from './components/refreshCache/AddToBack.vue';
 import EmptyArray from './components/refreshCache/EmptyArray.vue';
 import RefreshUninitializedCache from "./components/refreshCache/RefreshUninitializedCache.vue";
+import UpdateItemWithFindFn from "./components/refreshCache/UpdateItemWithFindFn.vue";
 
 const pollArgs = {
   interval: 250,
@@ -83,5 +84,13 @@ describe("refreshTanstackCache", () => {
 
     // Verify the query is still not initialized
     await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(false)
+  })
+
+  it('should update items to the cache with a findFn', async () => {
+    const wrapper = mount(UpdateItemWithFindFn, { global: { plugins: [VueQueryPlugin] } });
+
+    await expect.poll(() => wrapper.vm.helpers.isQueryInitialized(), pollArgs).toBe(true);
+    await wrapper.vm.addNewItem();
+    await expect.poll(() => wrapper.text(), pollArgs).toContain('New Item');
   })
 });
