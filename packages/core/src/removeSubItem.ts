@@ -1,8 +1,7 @@
-import { nextTick } from "vue"
-import { type IRemoveSubItem } from "../types"
-import { handleNotInitialized, isQueryInitialized } from "../utils"
-import { type QueryKey, type QueryClient } from "@tanstack/vue-query"
-import { removeArrayItem } from '../../../utilities/arrays/arrays'
+import { type IRemoveSubItem, IFrameworkAdapter } from "./types"
+import { handleNotInitialized, isQueryInitialized } from "./utils"
+import { removeArrayItem } from './utilities/arrays/arrays'
+import { type QueryKey, type QueryClient } from "@tanstack/query-core"
 
 export const removeSubItem = async <T extends object, U>(
     queryClient: QueryClient, 
@@ -13,13 +12,16 @@ export const removeSubItem = async <T extends object, U>(
         subItemsKey,
         removalKey = 'id' as keyof U,
         removalKeyValue
-    }: IRemoveSubItem<T, U>
+    }: IRemoveSubItem<T, U>,
+    frameworkAdapter: IFrameworkAdapter
 ) => {
     if (isQueryInitialized(queryClient, queryKey)) {
         queryClient.setQueryData<T[]>(
             queryKey,
             cacheArray => {
-                let temp = [...cacheArray!]
+                if (!cacheArray) return [];
+                
+                let temp = [...cacheArray];
                 // Create a shallow copy of the cache array
                 const newCacheArray = temp.map(item => ({ ...item }));
                 const target = newCacheArray.find(
@@ -37,7 +39,7 @@ export const removeSubItem = async <T extends object, U>(
                             array: newSubArray,
                             identityValues: [removalKeyValue as number],
                             identityKey: removalKey
-                        })
+                        });
 
                         // Update the target sub-items array
                         target[subItemsKey] = newSubArray as T[keyof T];
@@ -48,10 +50,12 @@ export const removeSubItem = async <T extends object, U>(
                     }
                 }
 
-                // Return the update local reactive copy of the cache
-                return newCacheArray
+                // Return the updated array
+                return newCacheArray;
             }
-        )
+        );
+        
+        await frameworkAdapter.nextTick();
     }
     else {
         handleNotInitialized({
@@ -60,8 +64,6 @@ export const removeSubItem = async <T extends object, U>(
             targetKeyValue,
             subItemsKey,
             removalKeyValue
-        }, queryKey)
+        }, queryKey);
     }
-
-    await nextTick();
 } 
