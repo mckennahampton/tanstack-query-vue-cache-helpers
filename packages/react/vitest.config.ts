@@ -7,14 +7,26 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     include: ['./src/**/*.{test,spec}.{js,ts,jsx,tsx}'],
+    deps: {
+      inline: [/@tanstack/, /@testing-library/]
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['./src/**/*.{js,ts,jsx,tsx}'],
+      reportsDirectory: './coverage',
       exclude: [
-        './src/**/*.{test,spec}.{js,ts,jsx,tsx}',
+        './tsup.config.ts',
+        './vitest.config.ts',
+        './dist/**/',
+        'src/**/*.{test,spec}.{js,ts,jsx,tsx}',
+        'src/tests/**/*',
         './src/**/types.{js,ts,jsx,tsx}',
-        './src/**/types/**/*.{js,ts,jsx,tsx}'
+        './src/**/types/**/*.{js,ts,jsx,tsx}',
+        './src/**/index.{js,ts,jsx,tsx}',
+        'src/**/*.d.ts',
+        'src/**/*.config.{js,ts}',
+        'src/**/index.{js,ts}',
+        'src/**/types.{js,ts}'
       ]
     }
   }
