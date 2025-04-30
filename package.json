@@ -8,17 +8,21 @@
     "dev": "pnpm -r dev",
     "lint": "pnpm -r lint",
     "clean": "pnpm -r clean",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "docs:dev": "vitepress dev docs --host",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "eslint": "^8.0.0",
-    "vitest": "^3.0.0",
-    "@vitest/coverage-v8": "^1.0.0",
-    "@vitejs/plugin-vue": "^5.0.0",
-    "jsdom": "^24.0.0",
     "@types/node": "^20.0.0",
-    "vue": "^3.0.0",
-    "@vue/runtime-core": "^3.0.0"
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "@vue/runtime-core": "^3.0.0",
+    "eslint": "^8.0.0",
+    "jsdom": "^24.0.0",
+    "typescript": "^5.0.0",
+    "vitepress": "^1.6.3",
+    "vitest": "^3.0.0",
+    "vue": "^3.0.0"
   }
 }
