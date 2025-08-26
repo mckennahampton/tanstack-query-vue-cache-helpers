@@ -3,23 +3,32 @@
 layout: home
 
 hero:
-  name: "Tanstack Query"
+  name: "TanStack Query"
   text: "Cache Helpers"
-  tagline: An unofficial suite of helper functions for efficient cache mutations
+  tagline: Efficient cache mutations for TanStack Query - update only what changed, not everything
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Get Started
+      link: /getting-started
     - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: View API
+      link: /api/
+    - theme: alt
+      text: Examples
+      link: /examples/
 
 features:
-  - title: Simplified Cache Updates
-    details: Easily add, update, or remove items from your TanStack Query cache without manual manipulation.
-  - title: Deep Object Operations
-    details: Perform updates or removals on nested items deep within your cached data structures.
-  - title: Granular Control
-    details: Refresh partial items, remove specific sub-items, or clear/refresh the entire cache for a query key.
+  - title: 🚀 Efficient Cache Updates
+    details: Add, update, or remove items from your TanStack Query cache without invalidating entire caches. Only update what actually changed.
+  - title: 🔍 Deep Object Operations
+    details: Perform updates or removals on nested items deep within your cached data structures with precise control.
+  - title: 🎯 Granular Control
+    details: Refresh partial items, remove specific sub-items, or clear/refresh the entire cache for a query key with fine-grained operations.
+  - title: ⚡ Framework Support
+    details: Built for Vue 3 and React with TanStack Query v5, featuring proper reactivity, TypeScript support, and framework-specific optimizations.
+  - title: 🔧 Framework Agnostic Core
+    details: Core functionality is framework-agnostic, with Vue and React-specific implementations for seamless integration.
+  - title: 📦 Zero Dependencies
+    details: Lightweight library with no additional dependencies beyond TanStack Query and your chosen framework.
 ---
 
